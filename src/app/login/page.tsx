@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
-import { Loader2, Zap } from 'lucide-react'
+import { Loader2, Zap, Eye, EyeOff } from 'lucide-react'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -13,6 +13,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [showPassword, setShowPassword] = useState(false)
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault()
@@ -65,20 +66,29 @@ export default function LoginPage() {
             <label className="block text-sm font-semibold text-slate-700 mb-1.5">
               Mot de passe
             </label>
-            <input
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-3 border-2 border-slate-200 rounded-xl text-sm outline-none focus:border-[#2a5298] focus:ring-4 focus:ring-[#2a5298]/10 transition-all"
-              placeholder="••••••••"
-            />
+            <div className="relative">
+              <input
+                type={showPassword ? 'text' : 'password'}
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-3 pr-12 border-2 border-slate-200 rounded-xl text-sm outline-none focus:border-[#2a5298] focus:ring-4 focus:ring-[#2a5298]/10 transition-all"
+                placeholder="••••••••"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-400 hover:text-[#2a5298] transition-all"
+              >
+                {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
+            </div>
           </div>
 
           <div className="text-right">
             <Link
               href="/forgot-password"
-              className="text-sm text-[#2a5298] font-semibold hover:underline transition-all"
+              className="text-sm text-[#2a5298] font-semibold hover:underline"
             >
               Mot de passe oublié ?
             </Link>
@@ -96,10 +106,7 @@ export default function LoginPage() {
 
         <p className="text-center mt-6 text-sm text-slate-500">
           Nouveau ?{' '}
-          <Link
-            href="/register"
-            className="text-[#2a5298] font-semibold hover:underline"
-          >
+          <Link href="/register" className="text-[#2a5298] font-semibold hover:underline">
             Créer un compte
           </Link>
         </p>
