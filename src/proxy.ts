@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { hasAccess } from '@/lib/roles'
 
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
@@ -36,16 +37,42 @@ export async function proxy(request: NextRequest) {
     path.startsWith('/forgot-password') ||
     path.startsWith('/reset-password')
 
+  // Non connecté → login (sauf pages d'auth)
   if (!user && !isAuthPage) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 
+  // Connecté sur une page d'auth → dashboard
   if (user && isAuthPage) {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
     return NextResponse.redirect(url)
+  }
+
+  // Connecté → vérifier les permissions de rôle
+  if (user && !isAuthPage) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    const role = profile?.role || 'employe'
+
+    // Si la page est protégée et pas accessible → redirection
+    // On ne bloque QUE si c'est une page "module" connue
+    const protectedPaths = ['/clients', '/ventes', '/stock', '/sav', '/factures', '/caisse', '/employes']
+    const isProtected = protectedPaths.some(
+      (p) => path === p || path.startsWith(p + '/')
+    )
+
+    if (isProtected && !hasAccess(role, path)) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/dashboard'
+      return NextResponse.redirect(url)
+    }
   }
 
   return supabaseResponse

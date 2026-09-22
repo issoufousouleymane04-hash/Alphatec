@@ -5,15 +5,16 @@ import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
 import {
   Search, Plus, Pencil, Trash2, X, Loader2, Shield, User as UserIcon,
-  Wrench, UserPlus, Mail, Phone, CheckCircle2, XCircle,
+  Wrench, UserPlus, Mail, Phone, CheckCircle2, XCircle, Coins,
 } from 'lucide-react'
 import ConfirmDialog from '@/components/ConfirmDialog'
+import { ROLES, Role } from '@/lib/roles'
 
 interface Employe {
   id: string
   nom: string
   email: string
-  role: 'admin' | 'employe' | 'technicien'
+  role: 'admin' | 'technicien' | 'caissier' | 'employe'
   telephone: string | null
   actif: boolean
   created_at: string
@@ -36,7 +37,7 @@ export default function EmployesTable({ initialEmployes, currentUserId }: Props)
   const supabase = createClient()
   const [employes, setEmployes] = useState<Employe[]>(initialEmployes)
   const [search, setSearch] = useState('')
-  const [filterRole, setFilterRole] = useState<'all' | 'admin' | 'employe' | 'technicien'>('all')
+  const [filterRole, setFilterRole] = useState<'all' | Employe['role']>('all')
   const [filterStatut, setFilterStatut] = useState<'all' | 'actif' | 'inactif'>('all')
   const [modalOpen, setModalOpen] = useState(false)
   const [editing, setEditing] = useState<Employe | null>(null)
@@ -60,7 +61,7 @@ export default function EmployesTable({ initialEmployes, currentUserId }: Props)
   const stats = {
     total: employes.length,
     admins: employes.filter((e) => e.role === 'admin').length,
-    employes: employes.filter((e) => e.role === 'employe').length,
+    caissiers: employes.filter((e) => e.role === 'caissier').length,
     techniciens: employes.filter((e) => e.role === 'technicien').length,
   }
 
@@ -87,7 +88,6 @@ export default function EmployesTable({ initialEmployes, currentUserId }: Props)
     setSaving(true)
 
     if (editing) {
-      // Modification
       const { data, error } = await supabase
         .from('profiles')
         .update({
@@ -110,7 +110,6 @@ export default function EmployesTable({ initialEmployes, currentUserId }: Props)
       toast.success('✅ Employé modifié')
       setModalOpen(false)
     } else {
-      // Création : on utilise signUp pour créer un vrai compte
       if (!form.password || form.password.length < 6) {
         setSaving(false)
         toast.error('Le mot de passe doit faire au moins 6 caractères')
@@ -120,7 +119,7 @@ export default function EmployesTable({ initialEmployes, currentUserId }: Props)
       const { data, error } = await supabase.auth.signUp({
         email: form.email,
         password: form.password,
-        options: { data: { nom: form.nom } },
+        options: { data: { nom: form.nom, telephone: form.telephone } },
       })
 
       if (error) {
@@ -135,7 +134,6 @@ export default function EmployesTable({ initialEmployes, currentUserId }: Props)
         return
       }
 
-      // Met à jour le rôle et le téléphone dans profiles
       const { data: profileData, error: profileError } = await supabase
         .from('profiles')
         .update({
@@ -154,7 +152,7 @@ export default function EmployesTable({ initialEmployes, currentUserId }: Props)
       }
 
       setEmployes((prev) => [profileData, ...prev])
-      toast.success('✅ Employé invité (email envoyé)')
+      toast.success('✅ Employé invité')
       setModalOpen(false)
     }
   }
@@ -185,8 +183,6 @@ export default function EmployesTable({ initialEmployes, currentUserId }: Props)
       return
     }
 
-    // On ne peut pas supprimer auth.users via le client normal, on supprime juste le profil
-    // (le compte auth reste orphelin, à nettoyer côté Supabase dashboard si besoin)
     const { error } = await supabase.from('profiles').delete().eq('id', deleteTarget.id)
 
     if (error) {
@@ -200,17 +196,29 @@ export default function EmployesTable({ initialEmployes, currentUserId }: Props)
   }
 
   function roleBadge(role: string) {
-    const conf: Record<string, { color: string; label: string; icon: any }> = {
-      admin: { color: 'bg-red-100 text-red-700', label: 'Admin', icon: Shield },
-      employe: { color: 'bg-blue-100 text-blue-700', label: 'Employé', icon: UserIcon },
-      technicien: { color: 'bg-purple-100 text-purple-700', label: 'Technicien', icon: Wrench },
+    const config = ROLES[role as Role]
+    const label = config?.label || role
+
+    const icons: Record<string, any> = {
+      admin: Shield,
+      employe: UserIcon,
+      technicien: Wrench,
+      caissier: Coins,
     }
-    const c = conf[role] || conf.employe
-    const Icon = c.icon
+    const colors: Record<string, string> = {
+      admin: 'bg-red-100 text-red-700',
+      employe: 'bg-blue-100 text-blue-700',
+      technicien: 'bg-purple-100 text-purple-700',
+      caissier: 'bg-green-100 text-green-700',
+    }
+
+    const Icon = icons[role] || UserIcon
+    const color = colors[role] || colors.employe
+
     return (
-      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${c.color}`}>
+      <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${color}`}>
         <Icon className="w-3 h-3" />
-        {c.label}
+        {label}
       </span>
     )
   }
@@ -228,8 +236,8 @@ export default function EmployesTable({ initialEmployes, currentUserId }: Props)
           <div className="text-2xl font-extrabold text-red-500">{stats.admins}</div>
         </div>
         <div className="bg-white rounded-2xl p-5 shadow-sm">
-          <div className="text-xs uppercase text-slate-500 font-semibold mb-1">Employés</div>
-          <div className="text-2xl font-extrabold text-blue-500">{stats.employes}</div>
+          <div className="text-xs uppercase text-slate-500 font-semibold mb-1">Caissiers</div>
+          <div className="text-2xl font-extrabold text-green-500">{stats.caissiers}</div>
         </div>
         <div className="bg-white rounded-2xl p-5 shadow-sm">
           <div className="text-xs uppercase text-slate-500 font-semibold mb-1">Techniciens</div>
@@ -257,8 +265,9 @@ export default function EmployesTable({ initialEmployes, currentUserId }: Props)
         >
           <option value="all">Tous les rôles</option>
           <option value="admin">Admins</option>
-          <option value="employe">Employés</option>
+          <option value="caissier">Caissiers</option>
           <option value="technicien">Techniciens</option>
+          <option value="employe">Employés</option>
         </select>
 
         <select
@@ -291,14 +300,13 @@ export default function EmployesTable({ initialEmployes, currentUserId }: Props)
                 <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Téléphone</th>
                 <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Rôle</th>
                 <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Statut</th>
-                <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Inscrit le</th>
                 <th className="text-right px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="text-center py-16 text-slate-400">
+                  <td colSpan={6} className="text-center py-16 text-slate-400">
                     {employes.length === 0
                       ? 'Aucun employé pour l\'instant.'
                       : 'Aucun résultat pour cette recherche.'}
@@ -318,9 +326,7 @@ export default function EmployesTable({ initialEmployes, currentUserId }: Props)
                         <div className="font-semibold text-slate-800">
                           {e.nom}
                           {e.id === currentUserId && (
-                            <span className="ml-2 text-xs text-[#2a5298] font-bold">
-                              (vous)
-                            </span>
+                            <span className="ml-2 text-xs text-[#2a5298] font-bold">(vous)</span>
                           )}
                         </div>
                       </div>
@@ -353,9 +359,6 @@ export default function EmployesTable({ initialEmployes, currentUserId }: Props)
                         </span>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-slate-500 text-xs">
-                      {new Date(e.created_at).toLocaleDateString('fr-FR')}
-                    </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                         <button
@@ -365,18 +368,12 @@ export default function EmployesTable({ initialEmployes, currentUserId }: Props)
                               ? 'hover:bg-amber-500 hover:text-white'
                               : 'hover:bg-green-500 hover:text-white'
                           }`}
-                          title={e.actif ? 'Désactiver' : 'Activer'}
                         >
-                          {e.actif ? (
-                            <XCircle className="w-4 h-4" />
-                          ) : (
-                            <CheckCircle2 className="w-4 h-4" />
-                          )}
+                          {e.actif ? <XCircle className="w-4 h-4" /> : <CheckCircle2 className="w-4 h-4" />}
                         </button>
                         <button
                           onClick={() => openEdit(e)}
                           className="w-9 h-9 rounded-lg bg-slate-100 hover:bg-[#2a5298] hover:text-white text-slate-600 flex items-center justify-center transition-all active:scale-90"
-                          title="Modifier"
                         >
                           <Pencil className="w-4 h-4" />
                         </button>
@@ -384,7 +381,6 @@ export default function EmployesTable({ initialEmployes, currentUserId }: Props)
                           onClick={() => setDeleteTarget(e)}
                           disabled={e.id === currentUserId}
                           className="w-9 h-9 rounded-lg bg-slate-100 hover:bg-red-500 hover:text-white text-slate-600 flex items-center justify-center transition-all active:scale-90 disabled:opacity-30 disabled:cursor-not-allowed"
-                          title="Supprimer"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
@@ -400,8 +396,8 @@ export default function EmployesTable({ initialEmployes, currentUserId }: Props)
 
       {/* MODAL */}
       {modalOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-5 animate-[fadeIn_0.2s_ease]">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md animate-[slideUp_0.3s_ease]">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-5">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between p-6 border-b border-slate-100">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1e3c72] to-[#2a5298] text-white flex items-center justify-center">
@@ -413,7 +409,7 @@ export default function EmployesTable({ initialEmployes, currentUserId }: Props)
               </div>
               <button
                 onClick={() => setModalOpen(false)}
-                className="w-9 h-9 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors"
+                className="w-9 h-9 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -421,84 +417,67 @@ export default function EmployesTable({ initialEmployes, currentUserId }: Props)
 
             <form onSubmit={handleSave} className="p-6 space-y-4">
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                  Nom complet *
-                </label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Nom complet *</label>
                 <input
                   type="text"
                   required
                   value={form.nom}
                   onChange={(e) => setForm({ ...form, nom: e.target.value })}
-                  className="w-full px-4 py-2.5 border-2 border-slate-200 rounded-xl text-sm outline-none focus:border-[#2a5298] transition-all"
+                  className="w-full px-4 py-2.5 border-2 border-slate-200 rounded-xl text-sm outline-none focus:border-[#2a5298]"
                   placeholder="Ahmed Diallo"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                  Email *
-                </label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Email *</label>
                 <input
                   type="email"
                   required
                   disabled={!!editing}
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  className="w-full px-4 py-2.5 border-2 border-slate-200 rounded-xl text-sm outline-none focus:border-[#2a5298] transition-all disabled:bg-slate-50 disabled:text-slate-400"
+                  className="w-full px-4 py-2.5 border-2 border-slate-200 rounded-xl text-sm outline-none focus:border-[#2a5298] disabled:bg-slate-50 disabled:text-slate-400"
                   placeholder="employe@alpha-tec.com"
                 />
-                {editing && (
-                  <p className="text-xs text-slate-400 mt-1">
-                    L&apos;email ne peut pas être modifié.
-                  </p>
-                )}
               </div>
 
               {!editing && (
                 <div>
-                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                    Mot de passe temporaire *
-                  </label>
+                  <label className="block text-sm font-semibold text-slate-700 mb-1.5">Mot de passe temporaire *</label>
                   <input
                     type="password"
                     required
                     minLength={6}
                     value={form.password}
                     onChange={(e) => setForm({ ...form, password: e.target.value })}
-                    className="w-full px-4 py-2.5 border-2 border-slate-200 rounded-xl text-sm outline-none focus:border-[#2a5298] transition-all"
+                    className="w-full px-4 py-2.5 border-2 border-slate-200 rounded-xl text-sm outline-none focus:border-[#2a5298]"
                     placeholder="•••••••• (min 6)"
                   />
-                  <p className="text-xs text-slate-400 mt-1">
-                    L&apos;employé pourra le changer plus tard.
-                  </p>
                 </div>
               )}
 
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                  Téléphone
-                </label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Téléphone</label>
                 <input
                   type="text"
                   value={form.telephone}
                   onChange={(e) => setForm({ ...form, telephone: e.target.value })}
-                  className="w-full px-4 py-2.5 border-2 border-slate-200 rounded-xl text-sm outline-none focus:border-[#2a5298] transition-all"
+                  className="w-full px-4 py-2.5 border-2 border-slate-200 rounded-xl text-sm outline-none focus:border-[#2a5298]"
                   placeholder="+227 90 00 00 00"
                 />
               </div>
 
               <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                  Rôle *
-                </label>
+                <label className="block text-sm font-semibold text-slate-700 mb-1.5">Rôle *</label>
                 <select
                   value={form.role}
                   onChange={(e) => setForm({ ...form, role: e.target.value as Employe['role'] })}
-                  className="w-full px-4 py-2.5 border-2 border-slate-200 rounded-xl text-sm outline-none focus:border-[#2a5298] bg-white transition-all"
+                  className="w-full px-4 py-2.5 border-2 border-slate-200 rounded-xl text-sm outline-none focus:border-[#2a5298] bg-white"
                 >
-                  <option value="employe">Employé</option>
-                  <option value="technicien">Technicien SAV</option>
-                  <option value="admin">Administrateur</option>
+                  <option value="employe">Employé (Dashboard, Clients, Ventes)</option>
+                  <option value="caissier">Caissier (Dashboard, Clients, Ventes, Factures, Caisse)</option>
+                  <option value="technicien">Technicien (Dashboard, Clients, Stock, SAV)</option>
+                  <option value="admin">Administrateur (tout)</option>
                 </select>
               </div>
 
@@ -527,7 +506,7 @@ export default function EmployesTable({ initialEmployes, currentUserId }: Props)
       <ConfirmDialog
         open={!!deleteTarget}
         title="Supprimer cet employé ?"
-        message={`Êtes-vous sûr de vouloir supprimer "${deleteTarget?.nom}" ? Le profil sera retiré, mais le compte d'authentification devra être supprimé manuellement dans Supabase.`}
+        message={`Êtes-vous sûr de vouloir supprimer "${deleteTarget?.nom}" ?`}
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}
       />
