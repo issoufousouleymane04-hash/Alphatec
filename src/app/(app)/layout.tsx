@@ -49,11 +49,10 @@ export default function AppLayout({
 
   return (
     <div className="flex min-h-screen bg-[#f4f6fa]">
-      <Sidebar
-        isOpen={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-        role={role}
-      />
+     <Sidebar
+  isOpen={sidebarOpen}
+  onClose={() => setSidebarOpen(false)}
+/>
 
       <main className="flex-1 min-w-0">
         <div className="p-4 sm:p-6 lg:p-8">
