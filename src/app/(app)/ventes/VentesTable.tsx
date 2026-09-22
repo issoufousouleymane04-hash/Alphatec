@@ -191,7 +191,7 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
       }
     }
 
-    // 4. Ajoute l'entrée en caisse
+      // 4. Ajoute l'entrée en caisse
     await supabase.from('caisse').insert({
       type: 'recette',
       montant: totalFinal,
@@ -199,6 +199,16 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
       categorie: 'vente',
       reference_id: vente.id,
       created_by: user?.id,
+    })
+
+    // 5. Crée automatiquement la facture
+    const factureNumero = `FAC-${Date.now().toString().slice(-8)}`
+    await supabase.from('factures').insert({
+      numero: factureNumero,
+      vente_id: vente.id,
+      client_id: vente.client_id,
+      montant: totalFinal,
+      statut: 'payee',
     })
 
     setSaving(false)

@@ -1,5 +1,6 @@
-import Header from '@/components/Header'
 import { createClient } from '@/lib/supabase/server'
+import Header from '@/components/Header'
+import FacturesTable from './FacturesTable'
 
 export default async function FacturesPage() {
   const supabase = await createClient()
@@ -10,12 +11,19 @@ export default async function FacturesPage() {
     .eq('id', user?.id)
     .single()
 
+  const { data: factures } = await supabase
+    .from('factures')
+    .select('*, clients(nom, email, telephone, ville), ventes(numero)')
+    .order('created_at', { ascending: false })
+
   return (
     <>
-      <Header title="Factures" subtitle="Suivi des factures clients" user={profile} />
-      <div className="bg-white rounded-2xl p-8 shadow-sm text-center text-slate-500">
-        Module Factures — à venir 🚧
-      </div>
+      <Header
+        title="Factures"
+        subtitle="Suivi des factures clients"
+        user={profile}
+      />
+      <FacturesTable initialFactures={factures || []} />
     </>
   )
 }
