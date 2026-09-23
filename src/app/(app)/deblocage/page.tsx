@@ -1,8 +1,8 @@
 import { createClient } from '@/lib/supabase/server'
 import Header from '@/components/Header'
-import VentesTable from './VentesTable'
+import DeblocageTable from './DeblocageTable'
 
-export default async function VentesPage() {
+export default async function DeblocagePage() {
   const supabase = await createClient()
   const { data: { user } } = await supabase.auth.getUser()
   const { data: profile } = await supabase
@@ -11,9 +11,9 @@ export default async function VentesPage() {
     .eq('id', user?.id)
     .single()
 
-  const { data: ventes } = await supabase
-    .from('ventes')
-    .select('*, clients(nom), profiles!vendeur_id(nom)')
+  const { data: deblocages } = await supabase
+    .from('deblocages')
+    .select('*, clients(nom, telephone), profiles!technicien_id(nom)')
     .order('created_at', { ascending: false })
 
   const { data: clients } = await supabase
@@ -21,22 +21,23 @@ export default async function VentesPage() {
     .select('*')
     .order('nom')
 
-  const { data: produits } = await supabase
-    .from('produits')
+  const { data: techniciens } = await supabase
+    .from('profiles')
     .select('*')
+    .in('role', ['technicien', 'admin'])
     .order('nom')
 
   return (
     <>
       <Header
-        title="Ventes"
-        subtitle="Suivi des ventes et commandes"
+        title="Déblocage"
+        subtitle="FRP • iCloud • Mise à jour • Services"
         user={profile}
       />
-      <VentesTable
-        initialVentes={ventes || []}
+      <DeblocageTable
+        initialDeblocages={deblocages || []}
         clients={clients || []}
-        produits={produits || []}
+        techniciens={techniciens || []}
       />
     </>
   )

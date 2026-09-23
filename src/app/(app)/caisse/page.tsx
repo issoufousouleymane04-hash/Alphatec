@@ -13,7 +13,7 @@ export default async function CaissePage() {
 
   const { data: transactions } = await supabase
     .from('caisse')
-    .select('*, profiles(nom)')
+    .select('*, profiles!created_by(nom)')
     .order('created_at', { ascending: false })
 
   return (

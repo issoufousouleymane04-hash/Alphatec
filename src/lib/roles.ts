@@ -7,13 +7,14 @@ export interface RoleConfig {
 }
 
 export const ROLES: Record<Role, RoleConfig> = {
-  admin: {
+    admin: {
     label: 'Administrateur',
     color: 'bg-red-100 text-red-700',
     paths: [
       '/dashboard',
       '/clients',
       '/ventes',
+      '/deblocage',
       '/stock',
       '/sav',
       '/factures',
@@ -21,10 +22,10 @@ export const ROLES: Record<Role, RoleConfig> = {
       '/employes',
     ],
   },
-  technicien: {
+     technicien: {
     label: 'Technicien',
     color: 'bg-purple-100 text-purple-700',
-    paths: ['/dashboard', '/clients', '/stock', '/sav'],
+    paths: ['/dashboard', '/clients', '/deblocage', '/stock', '/sav'],
   },
   caissier: {
     label: 'Caissier',

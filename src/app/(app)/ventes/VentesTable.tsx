@@ -154,7 +154,7 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
         mode_paiement: modePaiement,
         vendeur_id: user?.id,
       })
-      .select('*, clients(nom), profiles(nom)')
+      .select('*, clients(nom), profiles!vendeur_id(nom)')
       .single()
 
     if (venteError) {
@@ -222,7 +222,7 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
       .from('ventes')
       .update({ statut })
       .eq('id', vente.id)
-      .select('*, clients(nom), profiles(nom)')
+      .select('*, clients(nom), profiles!vendeur_id(nom)')
       .single()
 
     if (error) {

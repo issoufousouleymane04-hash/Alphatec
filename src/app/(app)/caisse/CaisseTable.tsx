@@ -160,7 +160,7 @@ export default function CaisseTable({ initialTransactions }: Props) {
         .from('caisse')
         .update(payload)
         .eq('id', editing.id)
-        .select('*, profiles(nom)')
+        .select('*, profiles!created_by(nom)')
         .single()
 
       setSaving(false)
@@ -179,7 +179,7 @@ export default function CaisseTable({ initialTransactions }: Props) {
       const { data, error } = await supabase
         .from('caisse')
         .insert({ ...payload, created_by: user?.id })
-        .select('*, profiles(nom)')
+        .select('*, profiles!created_by(nom)')
         .single()
 
       setSaving(false)

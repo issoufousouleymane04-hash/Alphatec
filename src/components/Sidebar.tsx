@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard, Users, ShoppingCart, Package,
-  Wrench, FileText, Coins, UserCog, LogOut, Zap, X,
+  Wrench, FileText, Coins, UserCog, LogOut, Zap, X, Unlock,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
@@ -15,6 +15,7 @@ const ALL_LINKS = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/clients', label: 'Clients', icon: Users },
   { href: '/ventes', label: 'Ventes', icon: ShoppingCart },
+    { href: '/deblocage', label: 'Déblocage', icon: Unlock },
   { href: '/stock', label: 'Stock', icon: Package },
   { href: '/sav', label: 'SAV', icon: Wrench },
   { href: '/factures', label: 'Factures', icon: FileText },
