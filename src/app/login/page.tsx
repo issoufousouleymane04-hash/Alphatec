@@ -104,10 +104,17 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <p className="text-center mt-6 text-sm text-slate-500">
+                <p className="text-center mt-6 text-sm text-slate-500">
           Nouveau ?{' '}
           <Link href="/register" className="text-[#2a5298] font-semibold hover:underline">
             Créer un compte
+          </Link>
+        </p>
+
+        <p className="text-center mt-4 text-xs text-slate-400">
+          En continuant, vous acceptez notre{' '}
+          <Link href="/confidentialite" className="text-[#2a5298] hover:underline">
+            politique de confidentialité
           </Link>
         </p>
       </div>

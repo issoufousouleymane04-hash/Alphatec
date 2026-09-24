@@ -54,14 +54,12 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
   const [posOpen, setPosOpen] = useState(false)
   const [deleteTarget, setDeleteTarget] = useState<Vente | null>(null)
 
-  // État de la caisse
   const [selectedClient, setSelectedClient] = useState<string>('')
   const [cart, setCart] = useState<CartLine[]>([])
   const [remise, setRemise] = useState<string>('0')
   const [modePaiement, setModePaiement] = useState<string>('espece')
   const [saving, setSaving] = useState(false)
 
-  // Totaux
   const total = useMemo(() => cart.reduce((s, l) => s + l.prix_unitaire * l.quantite, 0), [cart])
   const remiseNum = parseFloat(remise) || 0
   const totalFinal = Math.max(0, total - remiseNum)
@@ -137,9 +135,7 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
 
     setSaving(true)
 
-    // Génère un numéro unique
     const numero = `V-${Date.now().toString().slice(-8)}`
-
     const { data: { user } } = await supabase.auth.getUser()
 
     // 1. Crée la vente
@@ -180,7 +176,7 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
       return
     }
 
-    // 3. Décrémente le stock de chaque produit
+    // 3. Décrémente le stock
     for (const l of cart) {
       const p = produits.find((x) => x.id === l.produit_id)
       if (p) {
@@ -191,7 +187,7 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
       }
     }
 
-      // 4. Ajoute l'entrée en caisse
+    // 4. Ajoute l'entrée en caisse
     await supabase.from('caisse').insert({
       type: 'recette',
       montant: totalFinal,
@@ -203,18 +199,28 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
 
     // 5. Crée automatiquement la facture
     const factureNumero = `FAC-${Date.now().toString().slice(-8)}`
-    await supabase.from('factures').insert({
-      numero: factureNumero,
-      vente_id: vente.id,
-      client_id: vente.client_id,
-      montant: totalFinal,
-      statut: 'payee',
-    })
+    const { data: facture } = await supabase
+      .from('factures')
+      .insert({
+        numero: factureNumero,
+        vente_id: vente.id,
+        client_id: vente.client_id,
+        montant: totalFinal,
+        statut: 'payee',
+      })
+      .select('id')
+      .single()
 
     setSaving(false)
     setVentes((prev) => [vente, ...prev])
     toast.success(`✅ Vente ${numero} enregistrée`)
-    setPosOpen(false)
+
+    // 6. Ouvre la facture dans la même fenêtre
+    if (facture) {
+      window.location.href = `/factures/${facture.id}`
+    } else {
+      setPosOpen(false)
+    }
   }
 
   async function updateStatut(vente: Vente, statut: 'en_cours' | 'payee' | 'annulee') {
@@ -268,7 +274,6 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
     )
   }
 
-  // KPIs
   const totalVentes = ventes.length
   const ca = ventes.filter((v) => v.statut === 'payee').reduce((s, v) => s + Number(v.total), 0)
   const enCours = ventes.filter((v) => v.statut === 'en_cours').length
@@ -282,10 +287,8 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
           <div className="text-2xl font-extrabold text-[#1e3c72]">{totalVentes}</div>
         </div>
         <div className="bg-white rounded-2xl p-5 shadow-sm">
-          <div className="text-xs uppercase text-slate-500 font-semibold mb-1">Chiffre d'affaires</div>
-          <div className="text-2xl font-extrabold text-green-600">
-            {ca.toLocaleString('fr-FR')} F
-          </div>
+          <div className="text-xs uppercase text-slate-500 font-semibold mb-1">Chiffre d&apos;affaires</div>
+          <div className="text-2xl font-extrabold text-green-600">{ca.toLocaleString('fr-FR')} F</div>
         </div>
         <div className="bg-white rounded-2xl p-5 shadow-sm">
           <div className="text-xs uppercase text-slate-500 font-semibold mb-1">En cours</div>
@@ -295,7 +298,7 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
 
       {/* Barre d'actions */}
       <div className="bg-white rounded-2xl p-5 shadow-sm mb-6 flex flex-wrap items-center gap-4">
-        <div className="flex-1 min-w-[200px] flex items-center bg-slate-50 px-4 py-2.5 rounded-xl border border-slate-200 focus-within:border-[#2a5298] focus-within:ring-4 focus-within:ring-[#2a5298]/10 transition-all">
+        <div className="flex-1 min-w-[200px] flex items-center bg-slate-50 px-4 py-2.5 rounded-xl border border-slate-200 focus-within:border-[#2a5298]">
           <Search className="w-4 h-4 text-slate-400 mr-2" />
           <input
             type="text"
@@ -309,7 +312,7 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
         <select
           value={filterStatut}
           onChange={(e) => setFilterStatut(e.target.value as any)}
-          className="px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 outline-none focus:border-[#2a5298] bg-white"
+          className="px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-medium text-slate-700 bg-white"
         >
           <option value="all">Tous les statuts</option>
           <option value="payee">Payées</option>
@@ -332,14 +335,14 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
           <table className="w-full text-sm">
             <thead className="bg-slate-50 border-b border-slate-100">
               <tr>
-                <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">N°</th>
-                <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Client</th>
-                <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Vendeur</th>
-                <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Montant</th>
-                <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Paiement</th>
-                <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Statut</th>
-                <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Date</th>
-                <th className="text-right px-6 py-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Actions</th>
+                <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase">N°</th>
+                <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase">Client</th>
+                <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase">Vendeur</th>
+                <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase">Montant</th>
+                <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase">Paiement</th>
+                <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase">Statut</th>
+                <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase">Date</th>
+                <th className="text-right px-6 py-4 text-xs font-bold text-slate-500 uppercase">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -353,13 +356,8 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
                 </tr>
               ) : (
                 filtered.map((v) => (
-                  <tr
-                    key={v.id}
-                    className="border-b border-slate-50 hover:bg-slate-50 transition-colors group"
-                  >
-                    <td className="px-6 py-4 font-mono text-xs font-bold text-[#1e3c72]">
-                      {v.numero}
-                    </td>
+                  <tr key={v.id} className="border-b border-slate-50 hover:bg-slate-50 group">
+                    <td className="px-6 py-4 font-mono text-xs font-bold text-[#1e3c72]">{v.numero}</td>
                     <td className="px-6 py-4 text-slate-700">
                       {v.clients?.nom || <span className="text-slate-400 italic">Comptoir</span>}
                     </td>
@@ -368,11 +366,6 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
                     </td>
                     <td className="px-6 py-4 font-bold text-[#1e3c72]">
                       {Number(v.total).toLocaleString('fr-FR')} F
-                      {v.remise > 0 && (
-                        <div className="text-xs text-red-500 font-normal">
-                          -{Number(v.remise).toLocaleString('fr-FR')} F
-                        </div>
-                      )}
                     </td>
                     <td className="px-6 py-4 text-slate-600 text-xs capitalize">
                       {v.mode_paiement || '—'}
@@ -386,7 +379,7 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
                         {v.statut === 'en_cours' && (
                           <button
                             onClick={() => updateStatut(v, 'payee')}
-                            className="w-9 h-9 rounded-lg bg-slate-100 hover:bg-green-500 hover:text-white text-slate-600 flex items-center justify-center transition-all active:scale-90"
+                            className="w-9 h-9 rounded-lg bg-slate-100 hover:bg-green-500 hover:text-white text-slate-600 flex items-center justify-center"
                             title="Marquer payée"
                           >
                             <CheckCircle2 className="w-4 h-4" />
@@ -395,7 +388,7 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
                         {v.statut !== 'annulee' && (
                           <button
                             onClick={() => updateStatut(v, 'annulee')}
-                            className="w-9 h-9 rounded-lg bg-slate-100 hover:bg-amber-500 hover:text-white text-slate-600 flex items-center justify-center transition-all active:scale-90"
+                            className="w-9 h-9 rounded-lg bg-slate-100 hover:bg-amber-500 hover:text-white text-slate-600 flex items-center justify-center"
                             title="Annuler"
                           >
                             <XCircle className="w-4 h-4" />
@@ -403,7 +396,7 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
                         )}
                         <button
                           onClick={() => setDeleteTarget(v)}
-                          className="w-9 h-9 rounded-lg bg-slate-100 hover:bg-red-500 hover:text-white text-slate-600 flex items-center justify-center transition-all active:scale-90"
+                          className="w-9 h-9 rounded-lg bg-slate-100 hover:bg-red-500 hover:text-white text-slate-600 flex items-center justify-center"
                           title="Supprimer"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -418,12 +411,12 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
         </div>
       </div>
 
-      {/* MODAL CAISSE (POS) */}
+      {/* MODALE CAISSE (POS) */}
       {posOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-5 animate-[fadeIn_0.2s_ease]">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl animate-[slideUp_0.3s_ease] max-h-[92vh] overflow-hidden flex flex-col">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-3 animate-[fadeIn_0.2s_ease]">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl animate-[slideUp_0.3s_ease] max-h-[90vh] flex flex-col overflow-hidden">
             {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-slate-100">
+            <div className="flex items-center justify-between p-5 border-b border-slate-100 shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1e3c72] to-[#2a5298] text-white flex items-center justify-center">
                   <ShoppingCart className="w-5 h-5" />
@@ -435,16 +428,16 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
               </div>
               <button
                 onClick={() => setPosOpen(false)}
-                className="w-9 h-9 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500 transition-colors"
+                className="w-9 h-9 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500"
               >
                 <X className="w-4 h-4" />
               </button>
             </div>
 
             {/* Contenu 2 colonnes */}
-            <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 overflow-hidden">
+            <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 overflow-hidden min-h-0">
               {/* Catalogue produits (gauche) */}
-              <div className="lg:col-span-2 p-6 overflow-y-auto border-r border-slate-100">
+              <div className="lg:col-span-2 p-5 overflow-y-auto border-r border-slate-100">
                 <h3 className="text-sm font-bold text-slate-600 uppercase tracking-wider mb-4">
                   Catalogue produits
                 </h3>
@@ -462,12 +455,8 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
                             : 'border-slate-200 hover:border-[#2a5298] hover:shadow-md hover:-translate-y-0.5 active:scale-95'
                         }`}
                       >
-                        <div className="font-semibold text-sm text-slate-800 mb-1">
-                          {p.nom}
-                        </div>
-                        <div className="text-xs text-slate-400 font-mono mb-2">
-                          {p.reference}
-                        </div>
+                        <div className="font-semibold text-sm text-slate-800 mb-1">{p.nom}</div>
+                        <div className="text-xs text-slate-400 font-mono mb-2">{p.reference}</div>
                         <div className="flex items-center justify-between">
                           <span className="font-bold text-[#1e3c72] text-sm">
                             {Number(p.prix_vente).toLocaleString('fr-FR')} F
@@ -491,18 +480,18 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
               </div>
 
               {/* Panier (droite) */}
-              <div className="flex flex-col bg-slate-50">
-                <div className="p-6 space-y-4 overflow-y-auto flex-1">
+              <div className="flex flex-col bg-slate-50 h-full min-h-0">
+                <div className="p-4 space-y-3 overflow-y-auto flex-1 min-h-0">
                   {/* Client */}
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">
-                      <UserIcon className="w-4 h-4 inline mr-1" />
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
+                      <UserIcon className="w-3.5 h-3.5 inline mr-1" />
                       Client
                     </label>
                     <select
                       value={selectedClient}
                       onChange={(e) => setSelectedClient(e.target.value)}
-                      className="w-full px-3 py-2.5 border-2 border-slate-200 rounded-xl text-sm outline-none focus:border-[#2a5298] bg-white"
+                      className="w-full px-3 py-2 border-2 border-slate-200 rounded-lg text-sm bg-white outline-none focus:border-[#2a5298]"
                     >
                       <option value="">— Vente comptoir —</option>
                       {clients.map((c) => (
@@ -521,46 +510,41 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
                     </h3>
 
                     {cart.length === 0 ? (
-                      <div className="text-center py-8 text-slate-400 text-sm bg-white rounded-xl border-2 border-dashed border-slate-200">
+                      <div className="text-center py-5 text-slate-400 text-xs bg-white rounded-xl border-2 border-dashed border-slate-200">
                         Cliquez sur les produits à gauche
                       </div>
                     ) : (
-                      <ul className="space-y-2">
+                      <ul className="space-y-2 max-h-[160px] overflow-y-auto pr-1">
                         {cart.map((l) => (
-                          <li
-                            key={l.produit_id}
-                            className="bg-white rounded-xl p-3 shadow-sm"
-                          >
-                            <div className="flex items-start justify-between mb-2">
-                              <div className="text-sm font-semibold text-slate-800 flex-1 pr-2">
+                          <li key={l.produit_id} className="bg-white rounded-lg p-2.5 shadow-sm">
+                            <div className="flex items-start justify-between mb-1.5">
+                              <div className="text-xs font-semibold text-slate-800 flex-1 pr-2">
                                 {l.nom}
                               </div>
                               <button
                                 onClick={() => removeFromCart(l.produit_id)}
-                                className="text-slate-300 hover:text-red-500 transition-colors"
+                                className="text-slate-300 hover:text-red-500"
                               >
-                                <X className="w-4 h-4" />
+                                <X className="w-3.5 h-3.5" />
                               </button>
                             </div>
                             <div className="flex items-center justify-between">
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-1.5">
                                 <button
                                   onClick={() => updateQty(l.produit_id, l.quantite - 1)}
-                                  className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-[#2a5298] hover:text-white flex items-center justify-center transition-all active:scale-90"
+                                  className="w-6 h-6 rounded bg-slate-100 hover:bg-[#2a5298] hover:text-white flex items-center justify-center"
                                 >
                                   <Minus className="w-3 h-3" />
                                 </button>
-                                <span className="text-sm font-bold w-6 text-center">
-                                  {l.quantite}
-                                </span>
+                                <span className="text-xs font-bold w-5 text-center">{l.quantite}</span>
                                 <button
                                   onClick={() => updateQty(l.produit_id, l.quantite + 1)}
-                                  className="w-7 h-7 rounded-lg bg-slate-100 hover:bg-[#2a5298] hover:text-white flex items-center justify-center transition-all active:scale-90"
+                                  className="w-6 h-6 rounded bg-slate-100 hover:bg-[#2a5298] hover:text-white flex items-center justify-center"
                                 >
                                   <Plus className="w-3 h-3" />
                                 </button>
                               </div>
-                              <div className="text-sm font-bold text-[#1e3c72]">
+                              <div className="text-xs font-bold text-[#1e3c72]">
                                 {(l.prix_unitaire * l.quantite).toLocaleString('fr-FR')} F
                               </div>
                             </div>
@@ -572,10 +556,10 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
 
                   {/* Mode paiement */}
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
                       Mode de paiement
                     </label>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-2 gap-1.5">
                       {[
                         { val: 'espece', label: 'Espèce', icon: Banknote },
                         { val: 'carte', label: 'Carte', icon: CreditCard },
@@ -586,13 +570,13 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
                           key={val}
                           type="button"
                           onClick={() => setModePaiement(val)}
-                          className={`flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold transition-all active:scale-95 ${
+                          className={`flex items-center justify-center gap-1 px-2 py-1.5 rounded-lg text-[10px] font-semibold transition-all ${
                             modePaiement === val
-                              ? 'bg-[#2a5298] text-white shadow-md'
-                              : 'bg-white text-slate-600 border-2 border-slate-200 hover:border-[#2a5298]'
+                              ? 'bg-[#2a5298] text-white shadow'
+                              : 'bg-white text-slate-600 border border-slate-200'
                           }`}
                         >
-                          <Icon className="w-3.5 h-3.5" />
+                          <Icon className="w-3 h-3" />
                           {label}
                         </button>
                       ))}
@@ -601,7 +585,7 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
 
                   {/* Remise */}
                   <div>
-                    <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+                    <label className="block text-xs font-semibold text-slate-700 mb-1">
                       Remise (F)
                     </label>
                     <input
@@ -609,28 +593,28 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
                       min="0"
                       value={remise}
                       onChange={(e) => setRemise(e.target.value)}
-                      className="w-full px-3 py-2.5 border-2 border-slate-200 rounded-xl text-sm outline-none focus:border-[#2a5298] bg-white"
+                      className="w-full px-3 py-2 border-2 border-slate-200 rounded-lg text-sm bg-white outline-none focus:border-[#2a5298]"
                     />
                   </div>
                 </div>
 
                 {/* Résumé (bas) */}
-                <div className="p-6 bg-white border-t border-slate-100 space-y-3">
-                  <div className="flex justify-between text-sm">
+                <div className="p-4 bg-white border-t border-slate-100 space-y-1.5 shrink-0">
+                  <div className="flex justify-between text-xs">
                     <span className="text-slate-500">Sous-total</span>
                     <span className="font-semibold">{total.toLocaleString('fr-FR')} F</span>
                   </div>
                   {remiseNum > 0 && (
-                    <div className="flex justify-between text-sm">
+                    <div className="flex justify-between text-xs">
                       <span className="text-slate-500">Remise</span>
                       <span className="font-semibold text-red-500">
                         -{remiseNum.toLocaleString('fr-FR')} F
                       </span>
                     </div>
                   )}
-                  <div className="flex justify-between items-center pt-3 border-t border-slate-100">
-                    <span className="text-sm font-bold text-slate-700">TOTAL</span>
-                    <span className="text-2xl font-extrabold text-[#1e3c72]">
+                  <div className="flex justify-between items-center pt-2 border-t border-slate-100">
+                    <span className="text-xs font-bold text-slate-700">TOTAL</span>
+                    <span className="text-xl font-extrabold text-[#1e3c72]">
                       {totalFinal.toLocaleString('fr-FR')} F
                     </span>
                   </div>
@@ -638,7 +622,7 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
                   <button
                     onClick={handleSaveVente}
                     disabled={saving || cart.length === 0}
-                    className="w-full py-3 rounded-xl bg-gradient-to-br from-[#1e3c72] to-[#2a5298] text-white font-bold text-sm hover:-translate-y-0.5 hover:shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full py-2.5 rounded-xl bg-gradient-to-br from-[#1e3c72] to-[#2a5298] text-white font-bold text-sm hover:-translate-y-0.5 hover:shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     {saving ? (
                       <>

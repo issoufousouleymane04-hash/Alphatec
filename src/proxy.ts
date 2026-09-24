@@ -31,11 +31,12 @@ export async function proxy(request: NextRequest) {
   } = await supabase.auth.getUser()
 
   const path = request.nextUrl.pathname
-  const isAuthPage =
+    const isAuthPage =
     path.startsWith('/login') ||
     path.startsWith('/register') ||
     path.startsWith('/forgot-password') ||
-    path.startsWith('/reset-password')
+    path.startsWith('/reset-password') ||
+    path.startsWith('/confidentialite')
 
   // Non connecté → login (sauf pages d'auth)
   if (!user && !isAuthPage) {
