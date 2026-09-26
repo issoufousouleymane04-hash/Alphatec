@@ -37,6 +37,7 @@ export async function proxy(request: NextRequest) {
     path.startsWith('/forgot-password') ||
     path.startsWith('/reset-password') ||
     path.startsWith('/confidentialite')
+    path.startsWith('/vitrine')
 
   // Non connecté → login (sauf pages d'auth)
   if (!user && !isAuthPage) {
