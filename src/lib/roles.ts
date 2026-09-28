@@ -14,6 +14,7 @@ export const ROLES: Record<Role, RoleConfig> = {
       '/dashboard',
       '/clients',
       '/ventes',
+      '/telephones',
       '/deblocage',
       '/stock',
       '/sav',
@@ -25,12 +26,12 @@ export const ROLES: Record<Role, RoleConfig> = {
      technicien: {
     label: 'Technicien',
     color: 'bg-purple-100 text-purple-700',
-    paths: ['/dashboard', '/clients', '/deblocage', '/stock', '/sav'],
+    paths: ['/dashboard', '/clients','/telephones', '/deblocage', '/stock', '/sav'],
   },
   caissier: {
     label: 'Caissier',
     color: 'bg-green-100 text-green-700',
-    paths: ['/dashboard', '/clients', '/ventes', '/factures', '/caisse'],
+    paths: ['/dashboard', '/clients', '/ventes','/telephones', '/factures', '/caisse'],
   },
   employe: {
     label: 'Employé',

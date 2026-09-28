@@ -51,14 +51,15 @@ export default function Produits({ produits }: Props) {
 
   return (
     <section className="max-w-6xl mx-auto px-4 py-16">
-      <div className="text-center mb-12">
-        <div className="text-xs uppercase font-bold text-[#2a5298] tracking-widest mb-2">
+            <div className="text-center mb-14">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-purple-50 text-purple-700 text-xs font-bold uppercase tracking-widest mb-4">
+          <span>📱</span>
           Notre boutique
         </div>
-        <h2 className="text-3xl sm:text-4xl font-extrabold text-[#1e3c72] mb-3">
-          📱 Nos Articles
+        <h2 className="text-4xl sm:text-5xl font-black text-[#1e3c72] mb-4">
+          Nos <span className="bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">Articles</span>
         </h2>
-        <p className="text-slate-500 max-w-xl mx-auto">
+        <p className="text-slate-500 max-w-2xl mx-auto text-base sm:text-lg">
           Découvrez notre sélection de matériel informatique et accessoires disponibles en stock.
         </p>
       </div>

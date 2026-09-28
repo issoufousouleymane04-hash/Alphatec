@@ -8,16 +8,17 @@ export default function Contact() {
   )}?text=${encodeURIComponent(WHATSAPP_MESSAGE)}`
 
   return (
-    <section className="max-w-6xl mx-auto px-4 py-16">
+    <section id="contact" className="max-w-6xl mx-auto px-4 py-16 scroll-mt-20">
       {/* Titre */}
-      <div className="text-center mb-12">
-        <div className="text-xs uppercase font-bold text-[#2a5298] tracking-widest mb-2">
+      <div className="text-center mb-14">
+        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-green-50 text-green-700 text-xs font-bold uppercase tracking-widest mb-4">
+          <span>📞</span>
           Restons en contact
         </div>
-        <h2 className="text-3xl sm:text-4xl font-extrabold text-[#1e3c72] mb-3">
-          📞 Nous Contacter
+        <h2 className="text-4xl sm:text-5xl font-black text-[#1e3c72] mb-4">
+          Nous <span className="bg-gradient-to-r from-green-500 to-emerald-500 bg-clip-text text-transparent">Contacter</span>
         </h2>
-        <p className="text-slate-500 max-w-xl mx-auto">
+        <p className="text-slate-500 max-w-2xl mx-auto text-base sm:text-lg">
           Une question ? Un devis ? Écrivez-nous ou passez directement en boutique.
         </p>
       </div>

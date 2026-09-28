@@ -5,7 +5,8 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard, Users, ShoppingCart, Package,
-  Wrench, FileText, Coins, UserCog, LogOut, Zap, X, Unlock,
+  Wrench, FileText, Coins, UserCog, LogOut, Zap, X,
+  Unlock, Smartphone,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
 import { toast } from 'sonner'
@@ -15,7 +16,8 @@ const ALL_LINKS = [
   { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
   { href: '/clients', label: 'Clients', icon: Users },
   { href: '/ventes', label: 'Ventes', icon: ShoppingCart },
-    { href: '/deblocage', label: 'Déblocage', icon: Unlock },
+  { href: '/telephones', label: 'Téléphones', icon: Smartphone },
+  { href: '/deblocage', label: 'Déblocage', icon: Unlock },
   { href: '/stock', label: 'Stock', icon: Package },
   { href: '/sav', label: 'SAV', icon: Wrench },
   { href: '/factures', label: 'Factures', icon: FileText },
@@ -69,6 +71,7 @@ export default function Sidebar({ isOpen, onClose }: Props) {
 
   return (
     <>
+      {/* Overlay sombre sur mobile */}
       {isOpen && (
         <div
           onClick={onClose}
@@ -76,6 +79,7 @@ export default function Sidebar({ isOpen, onClose }: Props) {
         />
       )}
 
+      {/* Sidebar */}
       <aside
         className={`
           fixed lg:sticky top-0 left-0 z-50
@@ -86,11 +90,14 @@ export default function Sidebar({ isOpen, onClose }: Props) {
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
       >
+        {/* Logo + bouton fermer (mobile) */}
         <div className="flex items-center justify-between gap-2 px-6 py-6 border-b border-white/10">
           <div className="flex items-center gap-2">
             <Zap className="w-6 h-6 text-[#00c2ff]" />
             <span className="text-xl font-extrabold tracking-wide">Alpha-Tec</span>
           </div>
+
+          {/* Bouton fermer (uniquement mobile) */}
           <button
             onClick={onClose}
             className="lg:hidden w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center transition-colors"
@@ -99,6 +106,7 @@ export default function Sidebar({ isOpen, onClose }: Props) {
           </button>
         </div>
 
+        {/* Navigation */}
         <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           {loading ? (
             <div className="px-4 py-3 text-slate-400 text-xs">Chargement...</div>
@@ -124,6 +132,7 @@ export default function Sidebar({ isOpen, onClose }: Props) {
           )}
         </nav>
 
+        {/* Déconnexion */}
         <button
           onClick={handleLogout}
           className="flex items-center gap-3 px-6 py-4 border-t border-white/10 text-red-200 hover:bg-red-500/20 hover:text-white transition-all"

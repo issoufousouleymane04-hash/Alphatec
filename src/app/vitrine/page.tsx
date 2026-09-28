@@ -1,7 +1,9 @@
 import { createClient } from '@/lib/supabase/server'
 import VitrineHeader from './VitrineHeader'
 import Hero from './Hero'
+import VitrineTabs from './VitrineTabs'
 import Services from './Services'
+import Telephones from './Telephones'
 import Produits from './Produits'
 import Contact from './Contact'
 import WhatsAppButton from './WhatsAppButton'
@@ -11,33 +13,71 @@ export const dynamic = 'force-dynamic'
 export default async function VitrinePage() {
   const supabase = await createClient()
 
-  // Récupère les produits en stock
   const { data: produits } = await supabase
-  .from('produits')
-  .select('id, nom, reference, description, prix_vente, quantite, image_url, categories(nom)')
-  .gt('quantite', 0)
-  .order('nom')
-  .limit(12)
+    .from('produits')
+    .select('id, nom, reference, description, prix_vente, quantite, image_url, categories(nom)')
+    .gt('quantite', 0)
+    .order('nom')
+    .limit(12)
+
+  const { data: telephones } = await supabase
+    .from('telephones')
+    .select('*')
+    .gt('quantite', 0)
+    .order('created_at', { ascending: false })
+    .limit(20)
 
   return (
     <div className="min-h-screen bg-[#f4f6fa]">
       <VitrineHeader />
       <Hero />
+      <VitrineTabs />
       <Services />
+      <Telephones telephones={telephones || []} />
+      <div id="reseau" className="scroll-mt-20" />
+      <div id="informatique" className="scroll-mt-20" />
       <Produits produits={produits || []} />
       <Contact />
       <WhatsAppButton />
 
-      {/* Footer */}
-      <footer className="bg-[#0f172a] text-white py-8 mt-10">
-        <div className="max-w-6xl mx-auto px-4 text-center">
-          <div className="flex items-center justify-center gap-2 mb-3">
-            <span className="text-2xl">⚡</span>
-            <span className="text-xl font-extrabold">Alpha-Tec</span>
+      <footer className="bg-gradient-to-br from-[#0f172a] to-[#1e3c72] text-white py-12 mt-16">
+        <div className="max-w-6xl mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+            <div>
+              <div className="flex items-center gap-2 mb-3">
+                <span className="text-3xl">⚡</span>
+                <span className="text-2xl font-black">Alpha-Tec</span>
+              </div>
+              <p className="text-sm text-slate-400 leading-relaxed">
+                Votre partenaire de confiance pour la réparation, la vente de matériel
+                informatique et le déblocage de téléphones.
+              </p>
+            </div>
+            <div>
+              <h4 className="font-bold text-white mb-4 text-sm uppercase tracking-wider">Nos services</h4>
+              <ul className="space-y-2 text-sm text-slate-400">
+                <li>🔓 Déblocage FRP / iCloud</li>
+                <li>💻 Réparation ordinateurs</li>
+                <li>📱 Vente Android & iPhone</li>
+                <li>📶 Installation WiFi Zone</li>
+                <li>🌐 Configuration VPN</li>
+              </ul>
+            </div>
+            <div>
+              <h4 className="font-bold text-white mb-4 text-sm uppercase tracking-wider">Nous contacter</h4>
+              <ul className="space-y-2 text-sm text-slate-400">
+                <li>📞 +227 99 42 50 24</li>
+                <li>📧 contact@alpha-tec.com</li>
+                <li>📍 Quartier Talladje, vers la CNSS</li>
+                <li>🕐 Lun-Sam : 08h - 20h</li>
+              </ul>
+            </div>
           </div>
-          <p className="text-sm text-slate-400">
-            © {new Date().getFullYear()} Alpha-Tec — Tous droits réservés
-          </p>
+          <div className="pt-6 border-t border-white/10 text-center">
+            <p className="text-xs text-slate-500">
+              © {new Date().getFullYear()} Alpha-Tec — Tous droits réservés
+            </p>
+          </div>
         </div>
       </footer>
     </div>
