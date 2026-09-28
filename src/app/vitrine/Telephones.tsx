@@ -25,7 +25,7 @@ interface Props {
 
 const ETATS: Record<string, { label: string; color: string; emoji: string }> = {
   neuf: { label: 'Neuf', color: 'bg-green-500', emoji: '✨' },
-  reconditionne: { label: 'Reconditionné', color: 'bg-blue-500', emoji: '🔄' },
+  reconditionne: { label: 'Recond.', color: 'bg-blue-500', emoji: '🔄' },
   occasion: { label: 'Occasion', color: 'bg-amber-500', emoji: '📱' },
 }
 
@@ -33,9 +33,7 @@ export default function Telephones({ telephones }: Props) {
   const [filter, setFilter] = useState<'all' | 'android' | 'iphone'>('all')
   const [current, setCurrent] = useState(0)
 
-  if (telephones.length === 0) {
-    return null
-  }
+  if (telephones.length === 0) return null
 
   const filtered = telephones.filter((t) => filter === 'all' || t.type === filter)
   const withImages = filtered.filter((t) => t.image_url)
@@ -43,31 +41,30 @@ export default function Telephones({ telephones }: Props) {
   function next() {
     setCurrent((c) => (c + 1) % withImages.length)
   }
-
   function prev() {
     setCurrent((c) => (c - 1 + withImages.length) % withImages.length)
   }
 
   return (
-    <section id="telephones" className="max-w-6xl mx-auto px-4 py-16 scroll-mt-20">
-      <div className="text-center mb-14">
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-slate-100 text-slate-700 text-xs font-bold uppercase tracking-widest mb-4">
+    <section id="telephones" className="max-w-6xl mx-auto px-3 sm:px-4 py-12 sm:py-16 scroll-mt-20">
+      <div className="text-center mb-8 sm:mb-14">
+        <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-full bg-slate-100 text-slate-700 text-[10px] sm:text-xs font-bold uppercase tracking-widest mb-4">
           <span>📱</span>
           Notre sélection
         </div>
-        <h2 className="text-4xl sm:text-5xl font-black text-[#1e3c72] mb-4">
+        <h2 className="text-3xl sm:text-5xl font-black text-[#1e3c72] mb-3 sm:mb-4">
           Nos <span className="bg-gradient-to-r from-slate-600 to-slate-800 bg-clip-text text-transparent">Téléphones</span>
         </h2>
-        <p className="text-slate-500 max-w-2xl mx-auto text-base sm:text-lg">
+        <p className="text-slate-500 max-w-2xl mx-auto text-sm sm:text-lg px-2">
           Smartphones Android et iPhone neufs, reconditionnés ou d&apos;occasion.
         </p>
       </div>
 
       {/* Filtres */}
-      <div className="flex flex-wrap items-center justify-center gap-3 mb-10">
+      <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 mb-8 sm:mb-10">
         <button
           onClick={() => setFilter('all')}
-          className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all ${
+          className={`px-3 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all ${
             filter === 'all'
               ? 'bg-gradient-to-br from-[#1e3c72] to-[#2a5298] text-white shadow-md'
               : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
@@ -77,7 +74,7 @@ export default function Telephones({ telephones }: Props) {
         </button>
         <button
           onClick={() => setFilter('android')}
-          className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all ${
+          className={`px-3 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all ${
             filter === 'android'
               ? 'bg-green-500 text-white shadow-md'
               : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
@@ -87,7 +84,7 @@ export default function Telephones({ telephones }: Props) {
         </button>
         <button
           onClick={() => setFilter('iphone')}
-          className={`px-5 py-2.5 rounded-full text-sm font-bold transition-all ${
+          className={`px-3 sm:px-5 py-2 sm:py-2.5 rounded-full text-xs sm:text-sm font-bold transition-all ${
             filter === 'iphone'
               ? 'bg-slate-800 text-white shadow-md'
               : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
@@ -97,10 +94,10 @@ export default function Telephones({ telephones }: Props) {
         </button>
       </div>
 
-      {/* Carrousel (si images) */}
+      {/* Carrousel */}
       {withImages.length > 0 && (
-        <div className="mb-14">
-          <div className="relative bg-gradient-to-br from-[#1e3c72] to-[#2a5298] rounded-3xl overflow-hidden shadow-2xl">
+        <div className="mb-8 sm:mb-14">
+          <div className="relative bg-gradient-to-br from-[#1e3c72] to-[#2a5298] rounded-2xl sm:rounded-3xl overflow-hidden shadow-2xl">
             <div className="aspect-[16/9] relative">
               {withImages.map((t, i) => (
                 <div
@@ -109,42 +106,38 @@ export default function Telephones({ telephones }: Props) {
                     i === current ? 'opacity-100' : 'opacity-0'
                   }`}
                 >
-                  <img src={t.image_url!} alt={`${t.marque} ${t.modele}`} className="w-full h-full object-cover" />
+                  <img
+                    src={t.image_url!}
+                    alt={`${t.marque} ${t.modele}`}
+                    className="w-full h-full object-cover"
+                  />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
 
-                  <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-10 text-white">
+                  <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-10 text-white">
                     <div className="flex items-center gap-2 mb-2">
-                      <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold text-white ${ETATS[t.etat].color}`}>
+                      <span
+                        className={`px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold text-white ${ETATS[t.etat].color}`}
+                      >
                         {ETATS[t.etat].emoji} {ETATS[t.etat].label}
                       </span>
-                      <span className="text-xs text-white/70">
-                        {t.type === 'iphone' ? '🍎 iPhone' : '🤖 Android'}
-                      </span>
                     </div>
-                    <h3 className="text-3xl sm:text-4xl font-black mb-2">
+                    <h3 className="text-xl sm:text-4xl font-black mb-1 sm:mb-2">
                       {t.marque} {t.modele}
                     </h3>
-                    <div className="flex flex-wrap items-center gap-3 text-sm text-white/80 mb-3">
-                      {t.stockage && <span>💾 {t.stockage}</span>}
-                      {t.ram && <span>🧠 {t.ram} RAM</span>}
-                      {t.couleur && <span>🎨 {t.couleur}</span>}
+                    <div className="text-2xl sm:text-3xl font-black mb-2 sm:mb-3">
+                      {Number(t.prix).toLocaleString('fr-FR')} F
                     </div>
-                    <div className="flex items-center gap-4">
-                      <div className="text-3xl font-black">
-                        {Number(t.prix).toLocaleString('fr-FR')} F
-                      </div>
-                      <a
-                        href={`https://wa.me/${VITRINE_CONFIG.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(
-                          `Bonjour Alpha-Tec, je suis intéressé par : ${t.marque} ${t.modele}`
-                        )}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 rounded-full text-sm font-bold transition-all"
-                      >
-                        <MessageCircle className="w-4 h-4" />
-                        Commander
-                      </a>
-                    </div>
+                    <a
+                      href={`https://wa.me/${VITRINE_CONFIG.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(
+                        `Bonjour Alpha-Tec, je suis intéressé par : ${t.marque} ${t.modele}`
+                      )}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 bg-green-500 hover:bg-green-600 rounded-full text-xs sm:text-sm font-bold transition-all"
+                    >
+                      <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      Commander
+                    </a>
                   </div>
                 </div>
               ))}
@@ -153,23 +146,23 @@ export default function Telephones({ telephones }: Props) {
                 <>
                   <button
                     onClick={prev}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/20 backdrop-blur hover:bg-white/30 text-white flex items-center justify-center"
+                    className="absolute left-2 sm:left-3 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/20 backdrop-blur hover:bg-white/30 text-white flex items-center justify-center"
                   >
-                    <ChevronLeft className="w-6 h-6" />
+                    <ChevronLeft className="w-4 h-4 sm:w-6 sm:h-6" />
                   </button>
                   <button
                     onClick={next}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/20 backdrop-blur hover:bg-white/30 text-white flex items-center justify-center"
+                    className="absolute right-2 sm:right-3 top-1/2 -translate-y-1/2 w-8 h-8 sm:w-10 sm:h-10 rounded-full bg-white/20 backdrop-blur hover:bg-white/30 text-white flex items-center justify-center"
                   >
-                    <ChevronRight className="w-6 h-6" />
+                    <ChevronRight className="w-4 h-4 sm:w-6 sm:h-6" />
                   </button>
-                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-2">
+                  <div className="absolute bottom-2 sm:bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5 sm:gap-2">
                     {withImages.map((_, i) => (
                       <button
                         key={i}
                         onClick={() => setCurrent(i)}
-                        className={`h-2 rounded-full transition-all ${
-                          i === current ? 'w-8 bg-white' : 'w-2 bg-white/50'
+                        className={`h-1.5 sm:h-2 rounded-full transition-all ${
+                          i === current ? 'w-6 sm:w-8 bg-white' : 'w-1.5 sm:w-2 bg-white/50'
                         }`}
                       />
                     ))}
@@ -181,90 +174,83 @@ export default function Telephones({ telephones }: Props) {
         </div>
       )}
 
-      {/* Grille téléphones */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+      {/* 🎯 GRILLE 2 → 3 → 4 COLONNES */}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2.5 sm:gap-4">
         {filtered.map((t) => {
-          const whatsappUrl = `https://wa.me/${VITRINE_CONFIG.whatsapp.replace(/\D/g, '')}?text=${encodeURIComponent(
+          const whatsappUrl = `https://wa.me/${VITRINE_CONFIG.whatsapp.replace(
+            /\D/g,
+            ''
+          )}?text=${encodeURIComponent(
             `Bonjour Alpha-Tec, je suis intéressé par : ${t.marque} ${t.modele}`
           )}`
 
           return (
             <div
               key={t.id}
-              className="group bg-white rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col"
+              className="group bg-white rounded-xl sm:rounded-2xl shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 overflow-hidden flex flex-col relative"
             >
-              {/* Image */}
-              <div className="h-56 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center relative overflow-hidden">
+              {/* Bande animée */}
+              <div className="absolute top-0 left-0 right-0 h-0.5 bg-gradient-to-r from-[#2a5298] to-[#00c2ff] scale-x-0 group-hover:scale-x-100 origin-left transition-transform duration-500 z-10" />
+
+              {/* Image (hauteur réduite mobile) */}
+              <div className="h-28 sm:h-40 bg-gradient-to-br from-slate-100 to-slate-200 flex items-center justify-center relative overflow-hidden">
                 {t.image_url ? (
                   <img
                     src={t.image_url}
                     alt={`${t.marque} ${t.modele}`}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                   />
                 ) : (
-                  <Smartphone className="w-20 h-20 text-slate-300" />
+                  <Smartphone className="w-12 h-12 sm:w-16 sm:h-16 text-slate-300" />
                 )}
 
                 {/* Badge état */}
                 <span
-                  className={`absolute top-3 left-3 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full text-white ${ETATS[t.etat].color}`}
+                  className={`absolute top-1.5 sm:top-2.5 left-1.5 sm:left-2.5 text-[8px] sm:text-[10px] font-bold uppercase tracking-wider px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full text-white ${ETATS[t.etat].color}`}
                 >
                   {ETATS[t.etat].emoji} {ETATS[t.etat].label}
                 </span>
 
                 {/* Badge type */}
-                <span className="absolute top-3 right-3 text-[10px] font-bold px-2.5 py-1 rounded-full bg-white/95 backdrop-blur text-slate-700">
-                  {t.type === 'iphone' ? '🍎 iPhone' : '🤖 Android'}
+                <span className="absolute top-1.5 sm:top-2.5 right-1.5 sm:right-2.5 text-[8px] sm:text-[10px] font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full bg-white/95 backdrop-blur text-slate-700">
+                  {t.type === 'iphone' ? '🍎' : '🤖'}
                 </span>
               </div>
 
               {/* Contenu */}
-              <div className="p-5 flex-1 flex flex-col">
-                <h3 className="font-black text-slate-800 text-lg mb-1">
+              <div className="p-2.5 sm:p-4 flex-1 flex flex-col">
+                <h3 className="font-bold text-slate-800 text-[11px] sm:text-sm mb-1 line-clamp-2 leading-tight">
                   {t.marque} {t.modele}
                 </h3>
 
                 {/* Caractéristiques */}
-                <div className="flex flex-wrap gap-1.5 mb-3">
+                <div className="flex flex-wrap gap-1 mb-1.5 sm:mb-2">
                   {t.stockage && (
-                    <span className="text-[10px] font-bold px-2 py-1 rounded-md bg-blue-50 text-blue-700">
+                    <span className="text-[8px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded bg-blue-50 text-blue-700">
                       💾 {t.stockage}
                     </span>
                   )}
                   {t.ram && (
-                    <span className="text-[10px] font-bold px-2 py-1 rounded-md bg-purple-50 text-purple-700">
+                    <span className="text-[8px] sm:text-[10px] font-bold px-1.5 py-0.5 rounded bg-purple-50 text-purple-700">
                       🧠 {t.ram}
-                    </span>
-                  )}
-                  {t.couleur && (
-                    <span className="text-[10px] font-bold px-2 py-1 rounded-md bg-pink-50 text-pink-700">
-                      🎨 {t.couleur}
                     </span>
                   )}
                 </div>
 
-                {t.description && (
-                  <p className="text-xs text-slate-500 mb-3 line-clamp-2 flex-1">
-                    {t.description}
-                  </p>
-                )}
-
-                {/* Prix + CTA */}
-                <div className="flex items-center justify-between pt-3 border-t border-slate-100">
-                  <div>
-                    <div className="text-[10px] text-slate-400 font-semibold uppercase">Prix</div>
-                    <div className="text-xl font-black text-[#1e3c72]">
-                      {Number(t.prix).toLocaleString('fr-FR')} F
-                    </div>
+                {/* Prix */}
+                <div className="mt-auto pt-1.5 sm:pt-2 border-t border-slate-100">
+                  <div className="text-[10px] sm:text-xs text-slate-400 font-semibold uppercase">Prix</div>
+                  <div className="text-sm sm:text-lg font-black text-[#1e3c72] leading-tight">
+                    {Number(t.prix).toLocaleString('fr-FR')} F
                   </div>
 
                   <a
                     href={whatsappUrl}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="flex items-center gap-1.5 px-4 py-2 bg-green-500 hover:bg-green-600 text-white text-xs font-bold rounded-lg hover:-translate-y-0.5 hover:shadow-md active:scale-95 transition-all"
+                    className="mt-1.5 sm:mt-2 flex items-center justify-center gap-1 text-[10px] sm:text-xs font-bold text-green-600 hover:text-white hover:bg-green-500 border border-green-500 rounded-lg py-1 sm:py-1.5 transition-all"
                   >
-                    <MessageCircle className="w-3.5 h-3.5" />
+                    <MessageCircle className="w-3 h-3" />
                     Commander
                   </a>
                 </div>
