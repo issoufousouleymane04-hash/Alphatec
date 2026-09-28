@@ -80,15 +80,16 @@ export default function Sidebar({ isOpen, onClose }: Props) {
       )}
 
       {/* Sidebar */}
-      <aside
+            <aside
         className={`
           fixed lg:sticky top-0 left-0 z-50
-          w-64 h-screen
+          w-72 sm:w-64 h-screen
           bg-gradient-to-b from-[#1e3c72] to-[#2a5298] text-white
           flex flex-col
           transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
+        style={{ paddingTop: 'env(safe-area-inset-top)' }}
       >
         {/* Logo + bouton fermer (mobile) */}
         <div className="flex items-center justify-between gap-2 px-6 py-6 border-b border-white/10">
@@ -107,7 +108,7 @@ export default function Sidebar({ isOpen, onClose }: Props) {
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+                <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto overscroll-contain">
           {loading ? (
             <div className="px-4 py-3 text-slate-400 text-xs">Chargement...</div>
           ) : (
