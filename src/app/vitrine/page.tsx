@@ -16,14 +16,12 @@ export default async function VitrinePage() {
   const { data: produits } = await supabase
     .from('produits')
     .select('id, nom, reference, description, prix_vente, quantite, image_url, categories(nom)')
-    .gt('quantite', 0)
     .order('nom')
     .limit(12)
 
   const { data: telephones } = await supabase
     .from('telephones')
     .select('*')
-    .gt('quantite', 0)
     .order('created_at', { ascending: false })
     .limit(20)
 
