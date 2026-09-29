@@ -4,39 +4,49 @@ import Hero from './Hero'
 import VitrineTabs from './VitrineTabs'
 import Services from './Services'
 import Telephones from './Telephones'
-import Produits from './Produits'
+import Articles from './Articles'
 import Contact from './Contact'
 import WhatsAppButton from './WhatsAppButton'
+import BottomNav from './BottomNav'
 
 export const dynamic = 'force-dynamic'
 
 export default async function VitrinePage() {
   const supabase = await createClient()
 
-  const { data: produits } = await supabase
-    .from('produits')
-    .select('id, nom, reference, description, prix_vente, quantite, image_url, categories(nom)')
-    .order('nom')
-    .limit(12)
+  const { data: services } = await supabase
+    .from('services')
+    .select('*')
+    .eq('actif', true)
+    .order('ordre', { ascending: true })
 
   const { data: telephones } = await supabase
     .from('telephones')
     .select('*')
+    .gt('quantite', 0)
+    .order('created_at', { ascending: false })
+    .limit(20)
+
+  const { data: articles } = await supabase
+    .from('articles')
+    .select('*')
+    .gt('quantite', 0)
     .order('created_at', { ascending: false })
     .limit(20)
 
   return (
-    <div className="min-h-screen bg-[#f4f6fa]">
+        <div id="top" className="min-h-screen bg-[#f4f6fa]">
       <VitrineHeader />
       <Hero />
       <VitrineTabs />
-      <Services />
+      <Services services={services || []} />
       <Telephones telephones={telephones || []} />
+      <Articles articles={articles || []} />
       <div id="reseau" className="scroll-mt-20" />
       <div id="informatique" className="scroll-mt-20" />
-      <Produits produits={produits || []} />
       <Contact />
       <WhatsAppButton />
+      <BottomNav />
 
       <footer className="bg-gradient-to-br from-[#0f172a] to-[#1e3c72] text-white py-12 mt-16">
         <div className="max-w-6xl mx-auto px-4">
@@ -57,8 +67,8 @@ export default async function VitrinePage() {
                 <li>🔓 Déblocage FRP / iCloud</li>
                 <li>💻 Réparation ordinateurs</li>
                 <li>📱 Vente Android & iPhone</li>
+                <li>💻 Vente matériel informatique</li>
                 <li>📶 Installation WiFi Zone</li>
-                <li>🌐 Configuration VPN</li>
               </ul>
             </div>
             <div>

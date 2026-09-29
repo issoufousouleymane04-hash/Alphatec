@@ -1,6 +1,6 @@
 'use client'
 
-import { Phone, MessageCircle, MapPin, Wrench, Package, Wifi, Star, Users, Award } from 'lucide-react'
+import { Phone, MessageCircle, MapPin, Wrench, Smartphone, Wifi, Star, Users, Award } from 'lucide-react'
 import { VITRINE_CONFIG, WHATSAPP_MESSAGE } from '@/config/vitrine'
 
 export default function Hero() {
@@ -90,7 +90,7 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Navigation rapide */}
+                {/* Navigation rapide */}
         <div className="flex flex-wrap items-center justify-center gap-3 mb-8">
           <button
             onClick={() => scrollTo('services')}
@@ -100,11 +100,11 @@ export default function Hero() {
             Services
           </button>
           <button
-            onClick={() => scrollTo('articles')}
+            onClick={() => scrollTo('telephones')}
             className="group flex items-center gap-2 px-5 py-2.5 bg-white/10 backdrop-blur border border-white/20 hover:bg-white/20 hover:border-white/40 rounded-full text-sm font-semibold transition-all hover:-translate-y-0.5"
           >
-            <Package className="w-4 h-4 group-hover:scale-110 transition-transform" />
-            Articles
+            <Smartphone className="w-4 h-4 group-hover:scale-110 transition-transform" />
+            Téléphones
           </button>
           <button
             onClick={() => scrollTo('reseau')}

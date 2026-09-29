@@ -8,9 +8,9 @@ import {
 const TABS = [
   { id: 'services', label: 'Services', icon: Wrench, emoji: '🔧' },
   { id: 'telephones', label: 'Téléphones', icon: Smartphone, emoji: '📱' },
-  { id: 'articles', label: 'Articles', icon: Package, emoji: '📱' },
+  { id: 'articles', label: 'Articles', icon: Package, emoji: '💻' },
   { id: 'reseau', label: 'Réseau & WiFi', icon: Wifi, emoji: '📶' },
-  { id: 'informatique', label: 'Informatique', icon: Laptop, emoji: '💻' },
+  { id: 'informatique', label: 'Informatique', icon: Laptop, emoji: '🛠️' },
   { id: 'contact', label: 'Contact', icon: Phone, emoji: '📞' },
 ]
 
