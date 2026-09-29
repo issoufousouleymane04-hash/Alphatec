@@ -82,11 +82,11 @@ export default function Sidebar({ isOpen, onClose }: Props) {
       )}
 
       {/* Sidebar */}
-            <aside
+      <aside
         className={`
           fixed lg:sticky top-0 left-0 z-50
           w-72 sm:w-64 h-screen
-          bg-gradient-to-b from-[#1e3c72] to-[#2a5298] text-white
+          bg-gradient-to-b from-[#1e3c72] to-[#2a5298] dark:from-[#0a0a0a] dark:to-[#1a1a1a] text-white
           flex flex-col
           transition-transform duration-300 ease-in-out
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}

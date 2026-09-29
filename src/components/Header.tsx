@@ -4,6 +4,7 @@ import { Search, Bell } from 'lucide-react'
 import { toast } from 'sonner'
 import LanguageSwitcher from './LanguageSwitcher'
 import ProfileMenu from './ProfileMenu'
+import ThemeToggle from './ThemeToggle'
 
 interface HeaderProps {
   title: string
@@ -44,6 +45,9 @@ export default function Header({ title, subtitle, user }: HeaderProps) {
 
         {/* Langue */}
         <LanguageSwitcher />
+
+        {/* Thème */}
+        <ThemeToggle />
 
         {/* Notifications */}
         <button
