@@ -59,7 +59,11 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center p-5 bg-gradient-to-br from-[#1e3c72] via-[#2a5298] to-[#00c2ff]">
       <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl p-10">
         <div className="flex items-center justify-center gap-2 mb-4">
-          <Zap className="w-7 h-7 text-[#1e3c72]" />
+          <img
+            src="/logo/alpha-tec-icon.png"
+            alt="Alpha-Tec"
+            className="w-12 h-12 rounded-xl object-cover"
+          />
           <span className="text-2xl font-extrabold text-[#1e3c72]">Alpha-Tec</span>
         </div>
 

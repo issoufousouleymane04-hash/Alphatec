@@ -80,7 +80,11 @@ export default async function FactureDetailPage({
           <div className="flex items-start justify-between mb-10 border-b border-slate-200 pb-6">
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-3xl">⚡</span>
+                <img
+                  src="/logo/alpha-tec-icon.png"
+                  alt="Alpha-Tec"
+                  className="w-12 h-12 rounded-xl object-cover"
+                />
                 <span className="text-2xl font-extrabold text-[#1e3c72]">Alpha-Tec</span>
               </div>
               <div className="text-sm text-slate-500">

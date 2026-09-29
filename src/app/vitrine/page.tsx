@@ -1,7 +1,6 @@
 import { createClient } from '@/lib/supabase/server'
 import VitrineHeader from './VitrineHeader'
 import Hero from './Hero'
-import VitrineTabs from './VitrineTabs'
 import Services from './Services'
 import Telephones from './Telephones'
 import Articles from './Articles'
@@ -35,10 +34,9 @@ export default async function VitrinePage() {
     .limit(20)
 
   return (
-        <div id="top" className="min-h-screen bg-[#f4f6fa]">
+    <div id="top" className="min-h-screen bg-[#f4f6fa]">
       <VitrineHeader />
       <Hero />
-      <VitrineTabs />
       <Services services={services || []} />
       <Telephones telephones={telephones || []} />
       <Articles articles={articles || []} />
@@ -48,7 +46,7 @@ export default async function VitrinePage() {
       <WhatsAppButton />
       <BottomNav />
 
-      <footer className="bg-gradient-to-br from-[#0f172a] to-[#1e3c72] text-white py-12 mt-16">
+      <footer className="bg-gradient-to-br from-[#0f172a] to-[#1e3c72] text-white py-12 mt-16 pb-28">
         <div className="max-w-6xl mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
             <div>
@@ -62,7 +60,9 @@ export default async function VitrinePage() {
               </p>
             </div>
             <div>
-              <h4 className="font-bold text-white mb-4 text-sm uppercase tracking-wider">Nos services</h4>
+              <h4 className="font-bold text-white mb-4 text-sm uppercase tracking-wider">
+                Nos services
+              </h4>
               <ul className="space-y-2 text-sm text-slate-400">
                 <li>🔓 Déblocage FRP / iCloud</li>
                 <li>💻 Réparation ordinateurs</li>
@@ -72,7 +72,9 @@ export default async function VitrinePage() {
               </ul>
             </div>
             <div>
-              <h4 className="font-bold text-white mb-4 text-sm uppercase tracking-wider">Nous contacter</h4>
+              <h4 className="font-bold text-white mb-4 text-sm uppercase tracking-wider">
+                Nous contacter
+              </h4>
               <ul className="space-y-2 text-sm text-slate-400">
                 <li>📞 +227 99 42 50 24</li>
                 <li>📧 contact@alpha-tec.com</li>

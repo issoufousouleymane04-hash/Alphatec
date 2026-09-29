@@ -8,6 +8,11 @@ const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
   title: 'Alpha-Tec — Gestion',
   description: 'Système de gestion Alpha-Tec',
+  icons: {
+    icon: '/logo/alpha-tec-icon.png',
+    apple: '/logo/alpha-tec-icon.png',
+    shortcut: '/logo/alpha-tec-icon.png',
+  },
 }
 
 export default function RootLayout({

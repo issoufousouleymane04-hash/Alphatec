@@ -10,8 +10,12 @@ export default function VitrineHeader() {
     >
       <div className="max-w-6xl mx-auto px-3 sm:px-4 py-3 flex items-center justify-between gap-2">
         {/* Logo */}
-        <Link href="/vitrine" className="flex items-center gap-2 shrink-0">
-          <span className="text-2xl">⚡</span>
+                <Link href="/vitrine" className="flex items-center gap-2 shrink-0">
+          <img
+            src="/logo/alpha-tec-icon.png"
+            alt="Alpha-Tec"
+            className="w-9 h-9 sm:w-10 sm:h-10 rounded-lg object-cover"
+          />
           <span className="text-lg sm:text-xl font-extrabold text-[#1e3c72]">
             {VITRINE_CONFIG.nom}
           </span>

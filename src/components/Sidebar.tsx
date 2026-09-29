@@ -95,10 +95,14 @@ export default function Sidebar({ isOpen, onClose }: Props) {
       >
         {/* Logo + bouton fermer (mobile) */}
         <div className="flex items-center justify-between gap-2 px-6 py-6 border-b border-white/10">
-          <div className="flex items-center gap-2">
-            <Zap className="w-6 h-6 text-[#00c2ff]" />
-            <span className="text-xl font-extrabold tracking-wide">Alpha-Tec</span>
-          </div>
+                  <div className="flex items-center gap-2">
+          <img
+            src="/logo/alpha-tec-icon.png"
+            alt="Alpha-Tec"
+            className="w-10 h-10 rounded-xl object-cover"
+          />
+          <span className="text-xl font-extrabold tracking-wide">Alpha-Tec</span>
+        </div>
 
           {/* Bouton fermer (uniquement mobile) */}
           <button
