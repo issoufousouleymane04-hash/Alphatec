@@ -22,7 +22,7 @@ export const viewport: Viewport = {
   userScalable: true,
   themeColor: [
     { media: '(prefers-color-scheme: light)', color: '#1e3c72' },
-    { media: '(prefers-color-scheme: dark)', color: '#0f0f0f' },
+    { media: '(prefers-color-scheme: dark)', color: '#121212' },
   ],
 }
 
@@ -34,22 +34,35 @@ export default function RootLayout({
   return (
     <html lang="fr" suppressHydrationWarning>
       <head>
-        {/* 🎯 Script anti-flash : applique le thème AVANT le rendu */}
+        {/* 🎯 Script anti-flash : CLAIR par défaut */}
         <script
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
                 try {
                   var theme = localStorage.getItem('alpha-tec-theme');
-                  var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
 
-                  // Par défaut : suit le système
-                  if (theme === 'dark' || (theme === 'system' && prefersDark) || (!theme && prefersDark)) {
+                  // 🎯 RÈGLE :
+                  // - Si l'utilisateur a choisi 'dark' → sombre
+                  // - Si l'utilisateur a choisi 'system' → suit le système
+                  // - Sinon (par défaut, ou 'light') → CLAIR
+
+                  if (theme === 'dark') {
                     document.documentElement.classList.add('dark');
+                  } else if (theme === 'system') {
+                    var prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                    if (prefersDark) {
+                      document.documentElement.classList.add('dark');
+                    } else {
+                      document.documentElement.classList.remove('dark');
+                    }
                   } else {
+                    // 🎯 Par défaut : CLAIR (même si le système est en sombre)
                     document.documentElement.classList.remove('dark');
                   }
-                } catch (e) {}
+                } catch (e) {
+                  document.documentElement.classList.remove('dark');
+                }
               })();
             `,
           }}
@@ -57,7 +70,7 @@ export default function RootLayout({
       </head>
       <body className={inter.className}>
         {children}
-        <Toaster position="top-right" richColors theme="system" />
+        <Toaster position="top-right" richColors theme="light" />
       </body>
     </html>
   )

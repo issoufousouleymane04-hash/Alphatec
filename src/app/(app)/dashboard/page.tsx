@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Header from '@/components/Header'
 import KpiCard from '@/components/KpiCard'
+import { Coins, Users, Wrench, Package } from 'lucide-react'
 import VentesChart from './VentesChart'
 import ActivitesTable from './ActivitesTable'
 
@@ -13,12 +14,14 @@ export default async function DashboardPage() {
     .eq('id', user?.id)
     .single()
 
+  // KPIs réels
   const { count: clientsCount } = await supabase
     .from('clients')
     .select('*', { count: 'exact', head: true })
 
-  const { count: savCount } = await supabase
-    .from('tickets_sav')
+  // 🎯 Réparations en cours (au lieu de SAV)
+  const { count: reparationsCount } = await supabase
+    .from('reparations')
     .select('*', { count: 'exact', head: true })
     .in('statut', ['recu', 'en_cours'])
 
@@ -43,6 +46,7 @@ export default async function DashboardPage() {
         user={profile}
       />
 
+      {/* KPIs */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
         <KpiCard
           title="Chiffre d'affaires"
@@ -59,9 +63,9 @@ export default async function DashboardPage() {
           color="green"
         />
         <KpiCard
-          title="SAV en cours"
-          value={String(savCount || 0)}
-          delta="⚠ Tickets ouverts"
+          title="Réparations en cours"
+          value={String(reparationsCount || 0)}
+          delta="⚠ Interventions ouvertes"
           iconName="Wrench"
           color="orange"
           warn
@@ -75,6 +79,7 @@ export default async function DashboardPage() {
         />
       </div>
 
+      {/* Graphique + Activités */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
           <VentesChart />

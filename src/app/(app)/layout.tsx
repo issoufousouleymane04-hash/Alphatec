@@ -19,7 +19,7 @@ export default function AppLayout({
 
       <main className="flex-1 min-w-0">
         <div className="p-4 sm:p-6 lg:p-8">
-          {/* Bouton hamburger (uniquement mobile) */}
+          {/* Bouton hamburger (mobile) */}
           <button
             onClick={() => setSidebarOpen(true)}
             className="lg:hidden mb-4 w-11 h-11 rounded-xl bg-white shadow-sm flex items-center justify-center text-[#1e3c72] hover:shadow-md active:scale-95 transition-all"

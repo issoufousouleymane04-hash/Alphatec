@@ -1,5 +1,6 @@
 import { createServerClient } from '@supabase/ssr'
 import { NextResponse, type NextRequest } from 'next/server'
+import { hasAccess } from '@/lib/roles'
 
 export async function proxy(request: NextRequest) {
   let supabaseResponse = NextResponse.next({ request })
@@ -31,7 +32,6 @@ export async function proxy(request: NextRequest) {
 
   const path = request.nextUrl.pathname
 
-  // 🎯 Pages accessibles SANS connexion
   const isAuthPage =
     path.startsWith('/login') ||
     path.startsWith('/register') ||
@@ -40,14 +40,12 @@ export async function proxy(request: NextRequest) {
     path.startsWith('/confidentialite') ||
     path.startsWith('/vitrine')
 
-  // Si pas connecté ET pas sur une page publique → redirige vers /login
   if (!user && !isAuthPage) {
     const url = request.nextUrl.clone()
     url.pathname = '/login'
     return NextResponse.redirect(url)
   }
 
-  // Si connecté ET sur /login ou /register → redirige vers /dashboard
   if (
     user &&
     (path.startsWith('/login') || path.startsWith('/register'))
@@ -55,6 +53,40 @@ export async function proxy(request: NextRequest) {
     const url = request.nextUrl.clone()
     url.pathname = '/dashboard'
     return NextResponse.redirect(url)
+  }
+
+  if (user && !isAuthPage) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role')
+      .eq('id', user.id)
+      .single()
+
+    const role = profile?.role || 'employe'
+
+    const protectedPaths = [
+      '/clients',
+      '/ventes',
+      '/services',
+      '/telephones',
+      '/articles',
+      '/deblocage',
+      '/stock',
+      '/reparation',
+      '/factures',
+      '/caisse',
+      '/employes',
+    ]
+    
+    const isProtected = protectedPaths.some(
+      (p) => path === p || path.startsWith(p + '/')
+    )
+
+    if (isProtected && !hasAccess(role, path)) {
+      const url = request.nextUrl.clone()
+      url.pathname = '/dashboard'
+      return NextResponse.redirect(url)
+    }
   }
 
   return supabaseResponse

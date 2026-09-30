@@ -5,7 +5,7 @@ import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import {
   LayoutDashboard, Users, ShoppingCart, Package,
-  Wrench, FileText, Coins, UserCog, LogOut, Zap, X,
+  Wrench, FileText, Coins, UserCog, LogOut, X,
   Unlock, Smartphone,
 } from 'lucide-react'
 import { createClient } from '@/lib/supabase/client'
@@ -21,7 +21,7 @@ const ALL_LINKS = [
   { href: '/articles', label: 'Articles', icon: Package },
   { href: '/deblocage', label: 'Déblocage', icon: Unlock },
   { href: '/stock', label: 'Stock', icon: Package },
-  { href: '/sav', label: 'SAV', icon: Wrench },
+  { href: '/reparation', label: 'Réparation', icon: Wrench },
   { href: '/factures', label: 'Factures', icon: FileText },
   { href: '/caisse', label: 'Caisse', icon: Coins },
   { href: '/employes', label: 'Employés', icon: UserCog },
@@ -39,7 +39,6 @@ export default function Sidebar({ isOpen, onClose }: Props) {
   const [role, setRole] = useState<string>('employe')
   const [loading, setLoading] = useState(true)
 
-  // Charge le rôle de l'utilisateur
   useEffect(() => {
     async function loadRole() {
       const { data: { user } } = await supabase.auth.getUser()
@@ -61,7 +60,6 @@ export default function Sidebar({ isOpen, onClose }: Props) {
     loadRole()
   }, [supabase])
 
-  // Filtre les liens selon le rôle
   const visibleLinks = ALL_LINKS.filter((l) => hasAccess(role, l.href))
 
   async function handleLogout() {
@@ -73,38 +71,41 @@ export default function Sidebar({ isOpen, onClose }: Props) {
 
   return (
     <>
-      {/* Overlay sombre sur mobile */}
+      {/* Overlay mobile */}
       {isOpen && (
         <div
           onClick={onClose}
-          className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 lg:hidden animate-[fadeIn_0.2s_ease]"
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden animate-[fadeIn_0.2s_ease]"
         />
       )}
 
       {/* Sidebar */}
-      <aside
+       <aside
         className={`
           fixed lg:sticky top-0 left-0 z-50
-          w-72 sm:w-64 h-screen
-          bg-gradient-to-b from-[#1e3c72] to-[#2a5298] dark:from-[#0a0a0a] dark:to-[#1a1a1a] text-white
+          w-72 sm:w-64 min-h-screen h-screen lg:h-auto lg:min-h-screen
+          bg-gradient-to-b from-[#0a0f1e] via-[#0f172a] to-[#1e293b]
+          text-white
           flex flex-col
           transition-transform duration-300 ease-in-out
+          border-r border-white/5
           ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
         `}
         style={{ paddingTop: 'env(safe-area-inset-top)' }}
       >
-        {/* Logo + bouton fermer (mobile) */}
-        <div className="flex items-center justify-between gap-2 px-6 py-6 border-b border-white/10">
-                  <div className="flex items-center gap-2">
-          <img
-            src="/logo/alpha-tec-icon.png"
-            alt="Alpha-Tec"
-            className="w-10 h-10 rounded-xl object-cover"
-          />
-          <span className="text-xl font-extrabold tracking-wide">Alpha-Tec</span>
-        </div>
+        {/* Logo + bouton fermer mobile */}
+        <div className="flex items-center justify-between gap-2 px-6 py-6 border-b border-white/5 shrink-0">
+          <div className="flex items-center gap-2">
+            <img
+              src="/logo/alpha-tec-icon.png"
+              alt="Alpha-Tec"
+              className="w-10 h-10 rounded-xl object-cover"
+            />
+            <span className="text-xl font-extrabold tracking-wide bg-gradient-to-r from-white to-[#00c2ff] bg-clip-text text-transparent">
+              Alpha-Tec
+            </span>
+          </div>
 
-          {/* Bouton fermer (uniquement mobile) */}
           <button
             onClick={onClose}
             className="lg:hidden w-8 h-8 rounded-lg hover:bg-white/10 flex items-center justify-center transition-colors"
@@ -113,8 +114,8 @@ export default function Sidebar({ isOpen, onClose }: Props) {
           </button>
         </div>
 
-        {/* Navigation */}
-                <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto overscroll-contain">
+        {/* 🎯 Navigation — prend TOUT l'espace disponible */}
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto overscroll-contain">
           {loading ? (
             <div className="px-4 py-3 text-slate-400 text-xs">Chargement...</div>
           ) : (
@@ -125,28 +126,40 @@ export default function Sidebar({ isOpen, onClose }: Props) {
                   key={href}
                   href={href}
                   onClick={onClose}
-                  className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group ${
+                  className={`relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group overflow-hidden ${
                     active
-                      ? 'bg-white/15 text-white shadow-inner border-l-4 border-[#00c2ff]'
-                      : 'text-slate-300 hover:bg-white/10 hover:text-white hover:translate-x-1'
+                      ? 'bg-gradient-to-r from-[#00c2ff]/15 to-[#2a5298]/10 text-white shadow-inner'
+                      : 'text-slate-400 hover:bg-white/5 hover:text-white hover:translate-x-1'
                   }`}
                 >
-                  <Icon className="w-4 h-4 transition-transform group-hover:scale-110" />
-                  <span>{label}</span>
+                  {active && (
+                    <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-gradient-to-b from-[#00c2ff] to-[#2a5298]" />
+                  )}
+
+                  <Icon
+                    className={`w-4 h-4 transition-all ${
+                      active
+                        ? 'text-[#00c2ff] scale-110'
+                        : 'group-hover:scale-110 group-hover:text-[#00c2ff]'
+                    }`}
+                  />
+                  <span className={active ? 'font-bold' : ''}>{label}</span>
                 </Link>
               )
             })
           )}
         </nav>
 
-        {/* Déconnexion */}
-        <button
-          onClick={handleLogout}
-          className="flex items-center gap-3 px-6 py-4 border-t border-white/10 text-red-200 hover:bg-red-500/20 hover:text-white transition-all"
-        >
-          <LogOut className="w-4 h-4" />
-          <span className="text-sm font-medium">Déconnexion</span>
-        </button>
+        {/* 🎯 Déconnexion — collée en bas, sans espace blanc */}
+        <div className="shrink-0 border-t border-white/5">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-6 py-4 text-red-300 hover:bg-red-500/10 hover:text-red-200 transition-all"
+          >
+            <LogOut className="w-4 h-4" />
+            <span className="text-sm font-medium">Déconnexion</span>
+          </button>
+        </div>
       </aside>
     </>
   )

@@ -6,7 +6,7 @@ import { Sun, Moon, Monitor, Check } from 'lucide-react'
 type Theme = 'light' | 'dark' | 'system'
 
 export default function ThemeToggle() {
-  const [theme, setTheme] = useState<Theme>('system')
+  const [theme, setTheme] = useState<Theme>('light')
   const [open, setOpen] = useState(false)
   const [mounted, setMounted] = useState(false)
   const [spinning, setSpinning] = useState(false)
@@ -15,7 +15,8 @@ export default function ThemeToggle() {
   useEffect(() => {
     setMounted(true)
     const saved = localStorage.getItem('alpha-tec-theme') as Theme | null
-    if (saved) setTheme(saved)
+    // 🎯 Par défaut : CLAIR si rien n'est sauvegardé
+    setTheme(saved || 'light')
   }, [])
 
   function applyTheme(newTheme: Theme) {

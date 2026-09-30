@@ -7,7 +7,7 @@ export interface RoleConfig {
 }
 
 export const ROLES: Record<Role, RoleConfig> = {
-    admin: {
+  admin: {
     label: 'Administrateur',
     color: 'bg-red-100 text-red-700',
     paths: [
@@ -19,26 +19,47 @@ export const ROLES: Record<Role, RoleConfig> = {
       '/articles',
       '/deblocage',
       '/stock',
-      '/sav',
+      '/reparation',
       '/factures',
       '/caisse',
       '/employes',
     ],
   },
-     technicien: {
+  technicien: {
     label: 'Technicien',
     color: 'bg-purple-100 text-purple-700',
-    paths: ['/dashboard', '/clients', '/services','/telephones', '/articles', '/deblocage', '/stock', '/sav'],
+    paths: [
+      '/dashboard',
+      '/clients',
+      '/services',
+      '/telephones',
+      '/articles',
+      '/deblocage',
+      '/stock',
+      '/reparation',
+    ],
   },
   caissier: {
     label: 'Caissier',
     color: 'bg-green-100 text-green-700',
-    paths: ['/dashboard', '/clients', '/ventes','/telephones', '/articles', '/factures', '/caisse'],
+    paths: [
+      '/dashboard',
+      '/clients',
+      '/ventes',
+      '/telephones',
+      '/articles',
+      '/factures',
+      '/caisse',
+    ],
   },
   employe: {
     label: 'Employé',
     color: 'bg-blue-100 text-blue-700',
-    paths: ['/dashboard', '/clients', '/ventes'],
+    paths: [
+      '/dashboard',
+      '/clients',
+      '/ventes',
+    ],
   },
 }
 
