@@ -118,26 +118,7 @@ export default function Header({ title, subtitle, user }: HeaderProps) {
         })
       })
     } catch (e) {}
-
-    try {
-      const { data: stock } = await supabase
-        .from('produits')
-        .select('id, nom, quantite')
-        .lte('quantite', 2)
-        .limit(3)
-
-      stock?.forEach((s: any) => {
-        list.push({
-          id: `stock-${s.id}`,
-          type: 'stock',
-          titre: s.quantite === 0 ? 'Rupture de stock' : 'Stock faible',
-          message: `${s.nom} — ${s.quantite} restant${s.quantite > 1 ? 's' : ''}`,
-          date: new Date().toISOString(),
-          href: '/stock',
-          unread: true,
-        })
-      })
-    } catch (e) {}
+    
 
     list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     setNotifications(list)

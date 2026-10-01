@@ -71,7 +71,6 @@ export async function proxy(request: NextRequest) {
       '/telephones',
       '/articles',
       '/deblocage',
-      '/stock',
       '/reparation',
       '/factures',
       '/caisse',

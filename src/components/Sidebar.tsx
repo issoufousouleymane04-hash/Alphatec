@@ -20,7 +20,6 @@ const ALL_LINKS = [
   { href: '/telephones', label: 'Téléphones', icon: Smartphone },
   { href: '/articles', label: 'Articles', icon: Package },
   { href: '/deblocage', label: 'Déblocage', icon: Unlock },
-  { href: '/stock', label: 'Stock', icon: Package },
   { href: '/reparation', label: 'Réparation', icon: Wrench },
   { href: '/factures', label: 'Factures', icon: FileText },
   { href: '/caisse', label: 'Caisse', icon: Coins },

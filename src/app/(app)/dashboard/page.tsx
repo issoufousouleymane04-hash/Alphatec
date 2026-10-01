@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server'
 import Header from '@/components/Header'
 import KpiCard from '@/components/KpiCard'
-import { Coins, Users, Wrench, Package } from 'lucide-react'
+import { Coins, Users, Wrench, ShoppingCart } from 'lucide-react'
 import VentesChart from './VentesChart'
 import ActivitesTable from './ActivitesTable'
 
@@ -14,22 +14,15 @@ export default async function DashboardPage() {
     .eq('id', user?.id)
     .single()
 
-  // KPIs réels
+  // KPIs
   const { count: clientsCount } = await supabase
     .from('clients')
     .select('*', { count: 'exact', head: true })
 
-  // 🎯 Réparations en cours (au lieu de SAV)
   const { count: reparationsCount } = await supabase
     .from('reparations')
     .select('*', { count: 'exact', head: true })
     .in('statut', ['recu', 'en_cours'])
-
-  const { data: produits } = await supabase
-    .from('produits')
-    .select('quantite')
-
-  const totalStock = produits?.reduce((s, p) => s + (p.quantite || 0), 0) || 0
 
   const { data: ventesPayees } = await supabase
     .from('ventes')
@@ -37,6 +30,10 @@ export default async function DashboardPage() {
     .eq('statut', 'payee')
 
   const ca = ventesPayees?.reduce((s, v) => s + Number(v.total || 0), 0) || 0
+
+  const { count: ventesCount } = await supabase
+    .from('ventes')
+    .select('*', { count: 'exact', head: true })
 
   return (
     <>
@@ -71,10 +68,10 @@ export default async function DashboardPage() {
           warn
         />
         <KpiCard
-          title="Produits en stock"
-          value={String(totalStock)}
-          delta="▲ Stock total"
-          iconName="Package"
+          title="Total ventes"
+          value={String(ventesCount || 0)}
+          delta="▲ Toutes ventes"
+          iconName="ShoppingCart"
           color="blue"
         />
       </div>
