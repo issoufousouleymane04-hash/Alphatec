@@ -367,3 +367,94 @@ img {
     font-size: 16px !important;
   }
 }
+/* ============================================================
+   TABLEAUX RESPONSIVE MOBILE — CARTES
+   ============================================================ */
+
+/* Sur mobile : le tableau se transforme en cartes */
+@media (max-width: 767px) {
+  .table-mobile-cards thead {
+    display: none;
+  }
+
+  .table-mobile-cards,
+  .table-mobile-cards tbody,
+  .table-mobile-cards tr,
+  .table-mobile-cards td {
+    display: block;
+    width: 100%;
+  }
+
+  .table-mobile-cards tr {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    margin-bottom: 12px;
+    padding: 14px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    position: relative;
+  }
+
+  .table-mobile-cards td {
+    border: none !important;
+    padding: 6px 0 !important;
+    text-align: left !important;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    min-height: 32px;
+  }
+
+  /* Étiquette avant chaque valeur */
+  .table-mobile-cards td::before {
+    content: attr(data-label);
+    font-weight: 700;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: #94a3b8;
+    flex-shrink: 0;
+    min-width: 90px;
+  }
+
+  /* Cellule avec actions — pleine largeur */
+  .table-mobile-cards td[data-label="Actions"] {
+    justify-content: flex-end;
+    border-top: 1px solid #f1f5f9 !important;
+    margin-top: 8px;
+    padding-top: 12px !important;
+  }
+
+  .table-mobile-cards td[data-label="Actions"]::before {
+    display: none;
+  }
+
+  /* Cellule avec "N°" en haut — plus grosse */
+  .table-mobile-cards td[data-label="N°"],
+  .table-mobile-cards td[data-label="Numéro"] {
+    font-size: 16px;
+    font-weight: 800;
+    color: #1e3c72;
+    border-bottom: 1px solid #f1f5f9 !important;
+    padding-bottom: 10px !important;
+    margin-bottom: 8px;
+  }
+
+  /* Les boutons d'actions toujours visibles */
+  .table-mobile-cards td[data-label="Actions"] > div {
+    opacity: 1 !important;
+  }
+
+  /* Enlever la marge du tableau */
+  .table-mobile-cards {
+    padding: 0 !important;
+  }
+}
+
+/* Sur desktop : comportement normal */
+@media (min-width: 768px) {
+  .table-mobile-cards td::before {
+    display: none;
+  }
+}

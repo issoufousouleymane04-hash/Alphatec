@@ -148,6 +148,35 @@ export default function Sidebar({ isOpen, onClose }: Props) {
               )
             })
           )}
+
+          {/* Séparateur */}
+          <div className="my-3 border-t border-white/5" />
+
+          {/* Mon Profil */}
+          <Link
+            href="/profil"
+            onClick={onClose}
+            className={`relative flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 group overflow-hidden ${
+              pathname === '/profil'
+                ? 'bg-gradient-to-r from-[#00c2ff]/15 to-[#2a5298]/10 text-white shadow-inner'
+                : 'text-slate-400 hover:bg-white/5 hover:text-white hover:translate-x-1'
+            }`}
+          >
+            {pathname === '/profil' && (
+              <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-gradient-to-b from-[#00c2ff] to-[#2a5298]" />
+            )}
+
+            <UserCog
+              className={`w-4 h-4 transition-all ${
+                pathname === '/profil'
+                  ? 'text-[#00c2ff] scale-110'
+                  : 'group-hover:scale-110 group-hover:text-[#00c2ff]'
+              }`}
+            />
+            <span className={pathname === '/profil' ? 'font-bold' : ''}>
+              Mon Profil
+            </span>
+          </Link>
         </nav>
 
         {/* 🎯 Déconnexion — collée en bas, sans espace blanc */}

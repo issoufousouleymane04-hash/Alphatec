@@ -134,11 +134,9 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
     }
 
     setSaving(true)
-
     const numero = `V-${Date.now().toString().slice(-8)}`
     const { data: { user } } = await supabase.auth.getUser()
 
-    // 1. Crée la vente
     const { data: vente, error: venteError } = await supabase
       .from('ventes')
       .insert({
@@ -159,7 +157,6 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
       return
     }
 
-    // 2. Crée les lignes de vente
     const lignes = cart.map((l) => ({
       vente_id: vente.id,
       produit_id: l.produit_id,
@@ -176,7 +173,6 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
       return
     }
 
-    // 3. Décrémente le stock
     for (const l of cart) {
       const p = produits.find((x) => x.id === l.produit_id)
       if (p) {
@@ -187,7 +183,6 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
       }
     }
 
-    // 4. Ajoute l'entrée en caisse
     await supabase.from('caisse').insert({
       type: 'recette',
       montant: totalFinal,
@@ -197,7 +192,6 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
       created_by: user?.id,
     })
 
-    // 5. Crée automatiquement la facture
     const factureNumero = `FAC-${Date.now().toString().slice(-8)}`
     const { data: facture } = await supabase
       .from('factures')
@@ -215,7 +209,6 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
     setVentes((prev) => [vente, ...prev])
     toast.success(`✅ Vente ${numero} enregistrée`)
 
-    // 6. Ouvre la facture dans la même fenêtre
     if (facture) {
       window.location.href = `/factures/${facture.id}`
     } else {
@@ -329,10 +322,10 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
         </button>
       </div>
 
-      {/* Tableau */}
+      {/* Tableau responsive */}
       <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
-          <table className="w-full text-sm">
+        <div className="md:overflow-x-auto overflow-visible">
+          <table className="w-full text-sm table-mobile-cards">
             <thead className="bg-slate-50 border-b border-slate-100">
               <tr>
                 <th className="text-left px-6 py-4 text-xs font-bold text-slate-500 uppercase">N°</th>
@@ -357,25 +350,27 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
               ) : (
                 filtered.map((v) => (
                   <tr key={v.id} className="border-b border-slate-50 hover:bg-slate-50 group">
-                    <td className="px-6 py-4 font-mono text-xs font-bold text-[#1e3c72]">{v.numero}</td>
-                    <td className="px-6 py-4 text-slate-700">
+                    <td data-label="N°" className="px-6 py-4 font-mono text-xs font-bold text-[#1e3c72]">
+                      {v.numero}
+                    </td>
+                    <td data-label="Client" className="px-6 py-4 text-slate-700">
                       {v.clients?.nom || <span className="text-slate-400 italic">Comptoir</span>}
                     </td>
-                    <td className="px-6 py-4 text-slate-600 text-xs">
+                    <td data-label="Vendeur" className="px-6 py-4 text-slate-600 text-xs">
                       {v.profiles?.nom || '—'}
                     </td>
-                    <td className="px-6 py-4 font-bold text-[#1e3c72]">
+                    <td data-label="Montant" className="px-6 py-4 font-bold text-[#1e3c72]">
                       {Number(v.total).toLocaleString('fr-FR')} F
                     </td>
-                    <td className="px-6 py-4 text-slate-600 text-xs capitalize">
+                    <td data-label="Paiement" className="px-6 py-4 text-slate-600 text-xs capitalize">
                       {v.mode_paiement || '—'}
                     </td>
-                    <td className="px-6 py-4">{statutBadge(v.statut)}</td>
-                    <td className="px-6 py-4 text-slate-500 text-xs">
+                    <td data-label="Statut" className="px-6 py-4">{statutBadge(v.statut)}</td>
+                    <td data-label="Date" className="px-6 py-4 text-slate-500 text-xs">
                       {new Date(v.created_at).toLocaleDateString('fr-FR')}
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <td data-label="Actions" className="px-6 py-4 text-right">
+                      <div className="flex justify-end gap-2 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
                         {v.statut === 'en_cours' && (
                           <button
                             onClick={() => updateStatut(v, 'payee')}
@@ -413,9 +408,8 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
 
       {/* MODALE CAISSE (POS) */}
       {posOpen && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-3 animate-[fadeIn_0.2s_ease]">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl animate-[slideUp_0.3s_ease] max-h-[90vh] flex flex-col overflow-hidden">
-            {/* Header */}
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-3">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] flex flex-col overflow-hidden">
             <div className="flex items-center justify-between p-5 border-b border-slate-100 shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#1e3c72] to-[#2a5298] text-white flex items-center justify-center">
@@ -434,9 +428,7 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
               </button>
             </div>
 
-            {/* Contenu 2 colonnes */}
             <div className="flex-1 grid grid-cols-1 lg:grid-cols-3 overflow-hidden min-h-0">
-              {/* Catalogue produits (gauche) */}
               <div className="lg:col-span-2 p-5 overflow-y-auto border-r border-slate-100">
                 <h3 className="text-sm font-bold text-slate-600 uppercase tracking-wider mb-4">
                   Catalogue produits
@@ -463,11 +455,7 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
                           </span>
                           <span
                             className={`text-xs font-bold ${
-                              disabled
-                                ? 'text-red-500'
-                                : p.quantite < 5
-                                ? 'text-amber-500'
-                                : 'text-green-600'
+                              disabled ? 'text-red-500' : p.quantite < 5 ? 'text-amber-500' : 'text-green-600'
                             }`}
                           >
                             Stock: {p.quantite}
@@ -479,10 +467,8 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
                 </div>
               </div>
 
-              {/* Panier (droite) */}
               <div className="flex flex-col bg-slate-50 h-full min-h-0">
                 <div className="p-4 space-y-3 overflow-y-auto flex-1 min-h-0">
-                  {/* Client */}
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1">
                       <UserIcon className="w-3.5 h-3.5 inline mr-1" />
@@ -495,14 +481,11 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
                     >
                       <option value="">— Vente comptoir —</option>
                       {clients.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.nom}
-                        </option>
+                        <option key={c.id} value={c.id}>{c.nom}</option>
                       ))}
                     </select>
                   </div>
 
-                  {/* Panier */}
                   <div>
                     <h3 className="text-xs font-bold text-slate-600 uppercase tracking-wider mb-2 flex items-center gap-1.5">
                       <Receipt className="w-3.5 h-3.5" />
@@ -554,7 +537,6 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
                     )}
                   </div>
 
-                  {/* Mode paiement */}
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1">
                       Mode de paiement
@@ -583,7 +565,6 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
                     </div>
                   </div>
 
-                  {/* Remise */}
                   <div>
                     <label className="block text-xs font-semibold text-slate-700 mb-1">
                       Remise (F)
@@ -598,7 +579,6 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
                   </div>
                 </div>
 
-                {/* Résumé (bas) */}
                 <div className="p-4 bg-white border-t border-slate-100 space-y-1.5 shrink-0">
                   <div className="flex justify-between text-xs">
                     <span className="text-slate-500">Sous-total</span>
@@ -646,7 +626,7 @@ export default function VentesTable({ initialVentes, clients, produits }: Props)
       <ConfirmDialog
         open={!!deleteTarget}
         title="Supprimer cette vente ?"
-        message={`Êtes-vous sûr de vouloir supprimer la vente "${deleteTarget?.numero}" ? Les lignes associées seront aussi supprimées.`}
+        message={`Êtes-vous sûr de vouloir supprimer la vente "${deleteTarget?.numero}" ?`}
         onConfirm={handleDelete}
         onCancel={() => setDeleteTarget(null)}
       />

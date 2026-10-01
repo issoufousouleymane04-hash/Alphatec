@@ -35,11 +35,11 @@ export default function ProfileMenu({ user }: Props) {
 
   return (
     <div className="relative">
+      {/* Bouton avatar */}
       <button
         onClick={() => setOpen(!open)}
         className="flex items-center gap-3 pl-1 pr-3 py-1 rounded-full bg-white shadow-sm hover:-translate-y-0.5 hover:shadow-md active:scale-95 transition-all"
       >
-        {/* Avatar */}
         {user?.avatar_url ? (
           <img
             src={user.avatar_url}
@@ -63,10 +63,16 @@ export default function ProfileMenu({ user }: Props) {
         </div>
       </button>
 
+      {/* Menu déroulant */}
       {open && (
         <>
-          <div className="fixed inset-0 z-40" onClick={() => setOpen(false)} />
+          {/* Overlay pour fermer */}
+          <div
+            className="fixed inset-0 z-40"
+            onClick={() => setOpen(false)}
+          />
 
+          {/* Menu */}
           <div className="absolute right-0 top-14 z-50 bg-white rounded-2xl shadow-2xl border border-slate-200 w-72 overflow-hidden animate-[fadeIn_0.15s_ease]">
             {/* En-tête profil */}
             <div className="p-5 bg-gradient-to-br from-[#1e3c72] to-[#2a5298] text-white">
@@ -83,7 +89,9 @@ export default function ProfileMenu({ user }: Props) {
                   </div>
                 )}
                 <div className="flex-1 min-w-0">
-                  <div className="font-bold truncate">{user?.nom || 'Utilisateur'}</div>
+                  <div className="font-bold truncate">
+                    {user?.nom || 'Utilisateur'}
+                  </div>
                   <div className="text-xs text-white/70 truncate">
                     {user?.email || 'email@alpha-tec.com'}
                   </div>
@@ -91,9 +99,11 @@ export default function ProfileMenu({ user }: Props) {
               </div>
 
               <div className="flex items-center gap-2 mt-3">
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                  roleConfig?.color || 'bg-white/20 text-white'
-                }`}>
+                <span
+                  className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                    roleConfig?.color || 'bg-white/20 text-white'
+                  }`}
+                >
                   {roleLabel.toUpperCase()}
                 </span>
                 <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-500/30 text-green-100">
@@ -102,8 +112,9 @@ export default function ProfileMenu({ user }: Props) {
               </div>
             </div>
 
-            {/* Menu */}
+            {/* Liens */}
             <div className="p-2">
+              {/* Mon profil */}
               <Link
                 href="/profil"
                 onClick={() => setOpen(false)}
@@ -113,8 +124,9 @@ export default function ProfileMenu({ user }: Props) {
                 Mon profil
               </Link>
 
+              {/* Sécurité */}
               <Link
-                href="/profil#securite"
+                href="/profil"
                 onClick={() => setOpen(false)}
                 className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors"
               >
@@ -124,6 +136,7 @@ export default function ProfileMenu({ user }: Props) {
 
               <div className="my-1 border-t border-slate-100" />
 
+              {/* Déconnexion */}
               <button
                 onClick={handleLogout}
                 className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"

@@ -7,7 +7,7 @@ import { toast } from 'sonner'
 import {
   User, Mail, Phone, Shield, CheckCircle2, XCircle,
   Camera, Loader2, Lock, Eye, EyeOff, Calendar,
-  Save, LogOut, BadgeCheck, Briefcase,
+  Save, LogOut, Briefcase, AlertCircle,
 } from 'lucide-react'
 import { ROLES, Role } from '@/lib/roles'
 
@@ -36,15 +36,14 @@ export default function ProfilContent({ profile, email }: Props) {
   const [loading, setLoading] = useState(false)
   const [uploading, setUploading] = useState(false)
 
-  // Champs du formulaire
+  // Formulaires
   const [nom, setNom] = useState(profile?.nom || '')
   const [telephone, setTelephone] = useState(profile?.telephone || '')
   const [bio, setBio] = useState(profile?.bio || '')
   const [avatarUrl, setAvatarUrl] = useState(profile?.avatar_url || '')
 
-  // Changement de mot de passe
+  // Mot de passe
   const [showPwd, setShowPwd] = useState(false)
-  const [currentPwd, setCurrentPwd] = useState('')
   const [newPwd, setNewPwd] = useState('')
   const [confirmPwd, setConfirmPwd] = useState('')
   const [changingPwd, setChangingPwd] = useState(false)
@@ -52,7 +51,8 @@ export default function ProfilContent({ profile, email }: Props) {
   if (!profile) {
     return (
       <div className="bg-white rounded-2xl p-8 shadow-sm text-center text-slate-500">
-        Impossible de charger votre profil.
+        <AlertCircle className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+        <p>Impossible de charger votre profil.</p>
       </div>
     )
   }
@@ -88,7 +88,6 @@ export default function ProfilContent({ profile, email }: Props) {
 
     const { data: urlData } = supabase.storage.from('avatars').getPublicUrl(data.path)
 
-    // Mise à jour du profil
     const { error: updateError } = await supabase
       .from('profiles')
       .update({ avatar_url: urlData.publicUrl })
@@ -156,7 +155,6 @@ export default function ProfilContent({ profile, email }: Props) {
     }
 
     toast.success('✅ Mot de passe modifié')
-    setCurrentPwd('')
     setNewPwd('')
     setConfirmPwd('')
   }
@@ -179,9 +177,10 @@ export default function ProfilContent({ profile, email }: Props) {
 
         {/* Carte principale */}
         <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-          {/* Bannière colorée */}
+          {/* Bannière */}
           <div className="h-28 bg-gradient-to-br from-[#1e3c72] via-[#2a5298] to-[#00c2ff] relative">
-            <div className="absolute inset-0 opacity-20"
+            <div
+              className="absolute inset-0 opacity-20"
               style={{
                 backgroundImage: 'radial-gradient(circle at 20% 50%, white 1px, transparent 1px)',
                 backgroundSize: '20px 20px',
@@ -205,7 +204,7 @@ export default function ProfilContent({ profile, email }: Props) {
                   </div>
                 )}
 
-                {/* Bouton upload */}
+                {/* Upload */}
                 <button
                   onClick={() => fileInputRef.current?.click()}
                   disabled={uploading}
@@ -236,7 +235,7 @@ export default function ProfilContent({ profile, email }: Props) {
                 {email}
               </p>
 
-              {/* Badge rôle */}
+              {/* Badges */}
               <div className="flex items-center gap-2 mt-4 flex-wrap justify-center">
                 <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold ${roleColor}`}>
                   <Shield className="w-3.5 h-3.5" />
@@ -315,7 +314,7 @@ export default function ProfilContent({ profile, email }: Props) {
             </div>
           </div>
 
-          {/* Bouton déconnexion */}
+          {/* Déconnexion */}
           <button
             onClick={handleLogout}
             className="w-full mt-5 flex items-center justify-center gap-2 py-3 rounded-xl border-2 border-red-200 text-red-600 hover:bg-red-50 hover:border-red-300 font-semibold text-sm transition-all active:scale-95"

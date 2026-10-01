@@ -2,13 +2,15 @@
 
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import {
   Search, Bell, X, ShoppingCart, Wrench, FileText, Coins,
-  Users, Package, TrendingUp, CheckCheck,
+  Users, Package, CheckCheck, LogOut, User as UserIcon, Settings,
 } from 'lucide-react'
-import ProfileMenu from './ProfileMenu'
 import ThemeToggle from './ThemeToggle'
 import { createClient } from '@/lib/supabase/client'
+import { toast } from 'sonner'
+import { ROLES, Role } from '@/lib/roles'
 
 interface HeaderProps {
   title: string
@@ -17,6 +19,7 @@ interface HeaderProps {
     nom: string
     email: string
     role: string
+    avatar_url?: string | null
   } | null
 }
 
@@ -31,107 +34,117 @@ interface Notification {
 }
 
 export default function Header({ title, subtitle, user }: HeaderProps) {
+  const router = useRouter()
   const supabase = createClient()
+
+  // Notifications
   const [notifOpen, setNotifOpen] = useState(false)
   const [notifications, setNotifications] = useState<Notification[]>([])
   const [loading, setLoading] = useState(false)
   const [unreadCount, setUnreadCount] = useState(0)
 
-  // 🎯 Charge les notifications depuis Supabase
+  // Menu profil
+  const [profileOpen, setProfileOpen] = useState(false)
+
+  const initiale = user?.nom?.charAt(0).toUpperCase() || 'A'
+  const roleConfig = user?.role ? ROLES[user.role as Role] : null
+  const roleLabel = roleConfig?.label || user?.role || 'Utilisateur'
+
+  // 🎯 Chargement des notifications
   async function loadNotifications() {
     setLoading(true)
     const list: Notification[] = []
-
-    // 1. Ventes récentes (24h)
     const since = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
 
-    const { data: ventes } = await supabase
-      .from('ventes')
-      .select('id, numero, total, created_at, clients(nom)')
-      .gte('created_at', since)
-      .order('created_at', { ascending: false })
-      .limit(5)
+    try {
+      const { data: ventes } = await supabase
+        .from('ventes')
+        .select('id, numero, total, created_at, clients(nom)')
+        .gte('created_at', since)
+        .order('created_at', { ascending: false })
+        .limit(5)
 
-    ventes?.forEach((v: any) => {
-      list.push({
-        id: `vente-${v.id}`,
-        type: 'vente',
-        titre: 'Nouvelle vente',
-        message: `${v.clients?.nom || 'Comptoir'} — ${Number(v.total).toLocaleString('fr-FR')} F`,
-        date: v.created_at,
-        href: '/ventes',
-        unread: true,
+      ventes?.forEach((v: any) => {
+        list.push({
+          id: `vente-${v.id}`,
+          type: 'vente',
+          titre: 'Nouvelle vente',
+          message: `${v.clients?.nom || 'Comptoir'} — ${Number(v.total).toLocaleString('fr-FR')} F`,
+          date: v.created_at,
+          href: '/ventes',
+          unread: true,
+        })
       })
-    })
+    } catch (e) {}
 
-    // 2. Factures impayées
-    const { data: factures } = await supabase
-      .from('factures')
-      .select('id, numero, montant, created_at, clients(nom)')
-      .eq('statut', 'impayee')
-      .order('created_at', { ascending: false })
-      .limit(3)
+    try {
+      const { data: factures } = await supabase
+        .from('factures')
+        .select('id, numero, montant, created_at, clients(nom)')
+        .eq('statut', 'impayee')
+        .order('created_at', { ascending: false })
+        .limit(3)
 
-    factures?.forEach((f: any) => {
-      list.push({
-        id: `facture-${f.id}`,
-        type: 'facture',
-        titre: 'Facture impayée',
-        message: `${f.clients?.nom || 'Client'} — ${Number(f.montant).toLocaleString('fr-FR')} F`,
-        date: f.created_at,
-        href: '/factures',
-        unread: true,
+      factures?.forEach((f: any) => {
+        list.push({
+          id: `facture-${f.id}`,
+          type: 'facture',
+          titre: 'Facture impayée',
+          message: `${f.clients?.nom || 'Client'} — ${Number(f.montant).toLocaleString('fr-FR')} F`,
+          date: f.created_at,
+          href: '/factures',
+          unread: true,
+        })
       })
-    })
+    } catch (e) {}
 
-    // 3. Réparations en cours
-    const { data: reparations } = await supabase
-      .from('reparations')
-      .select('id, numero, panne, statut, created_at, clients(nom)')
-      .in('statut', ['recu', 'en_cours'])
-      .order('created_at', { ascending: false })
-      .limit(3)
+    try {
+      const { data: reparations } = await supabase
+        .from('reparations')
+        .select('id, numero, panne, statut, created_at, clients(nom)')
+        .in('statut', ['recu', 'en_cours'])
+        .order('created_at', { ascending: false })
+        .limit(3)
 
-    reparations?.forEach((r: any) => {
-      list.push({
-        id: `reparation-${r.id}`,
-        type: 'reparation',
-        titre: 'Réparation en cours',
-        message: `${r.clients?.nom || 'Client'} — ${r.panne?.slice(0, 40) || 'Panne'}`,
-        date: r.created_at,
-        href: '/reparation',
-        unread: true,
+      reparations?.forEach((r: any) => {
+        list.push({
+          id: `reparation-${r.id}`,
+          type: 'reparation',
+          titre: 'Réparation en cours',
+          message: `${r.clients?.nom || 'Client'} — ${r.panne?.slice(0, 40) || 'Panne'}`,
+          date: r.created_at,
+          href: '/reparation',
+          unread: true,
+        })
       })
-    })
+    } catch (e) {}
 
-    // 4. Produits en rupture
-    const { data: stock } = await supabase
-      .from('produits')
-      .select('id, nom, quantite, seuil_alerte')
-      .lte('quantite', 2)
-      .limit(3)
+    try {
+      const { data: stock } = await supabase
+        .from('produits')
+        .select('id, nom, quantite')
+        .lte('quantite', 2)
+        .limit(3)
 
-    stock?.forEach((s: any) => {
-      list.push({
-        id: `stock-${s.id}`,
-        type: 'stock',
-        titre: s.quantite === 0 ? 'Rupture de stock' : 'Stock faible',
-        message: `${s.nom} — ${s.quantite} restant${s.quantite > 1 ? 's' : ''}`,
-        date: new Date().toISOString(),
-        href: '/stock',
-        unread: true,
+      stock?.forEach((s: any) => {
+        list.push({
+          id: `stock-${s.id}`,
+          type: 'stock',
+          titre: s.quantite === 0 ? 'Rupture de stock' : 'Stock faible',
+          message: `${s.nom} — ${s.quantite} restant${s.quantite > 1 ? 's' : ''}`,
+          date: new Date().toISOString(),
+          href: '/stock',
+          unread: true,
+        })
       })
-    })
+    } catch (e) {}
 
-    // Trie par date
     list.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-
     setNotifications(list)
     setUnreadCount(list.filter((n) => n.unread).length)
     setLoading(false)
   }
 
-  // Charge au démarrage + toutes les 30 secondes
   useEffect(() => {
     loadNotifications()
     const interval = setInterval(loadNotifications, 30000)
@@ -139,10 +152,15 @@ export default function Header({ title, subtitle, user }: HeaderProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Ouvrir le panneau = rafraîchir
   function openNotifications() {
     setNotifOpen(true)
     loadNotifications()
+    setProfileOpen(false)
+  }
+
+  function openProfile() {
+    setProfileOpen(!profileOpen)
+    setNotifOpen(false)
   }
 
   function markAllRead() {
@@ -159,6 +177,13 @@ export default function Header({ title, subtitle, user }: HeaderProps) {
     if (diff < 3600) return `Il y a ${Math.floor(diff / 60)} min`
     if (diff < 86400) return `Il y a ${Math.floor(diff / 3600)} h`
     return d.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit' })
+  }
+
+  async function handleLogout() {
+    await supabase.auth.signOut()
+    toast.success('Déconnecté')
+    router.push('/login')
+    router.refresh()
   }
 
   const iconMap: Record<string, any> = {
@@ -209,7 +234,7 @@ export default function Header({ title, subtitle, user }: HeaderProps) {
           {/* Thème */}
           <ThemeToggle />
 
-          {/* 🎯 Notifications */}
+          {/* 🔔 Notifications */}
           <button
             onClick={openNotifications}
             className="relative w-11 h-11 rounded-full bg-white shadow-sm flex items-center justify-center text-[#1e3c72] hover:-translate-y-0.5 hover:shadow-md active:scale-95 transition-all shrink-0"
@@ -223,23 +248,121 @@ export default function Header({ title, subtitle, user }: HeaderProps) {
             )}
           </button>
 
-          {/* Profil */}
-          <ProfileMenu user={user || null} />
+          {/* 🎯 AVATAR PROFIL (à côté de la cloche) */}
+          <div className="relative">
+            <button
+              onClick={openProfile}
+              className="relative w-11 h-11 rounded-full bg-white shadow-sm flex items-center justify-center hover:-translate-y-0.5 hover:shadow-md active:scale-95 transition-all shrink-0 overflow-hidden"
+              aria-label="Mon profil"
+            >
+              {user?.avatar_url ? (
+                <img
+                  src={user.avatar_url}
+                  alt={user.nom}
+                  className="w-full h-full rounded-full object-cover"
+                />
+              ) : (
+                <div className="w-full h-full rounded-full bg-gradient-to-br from-[#1e3c72] to-[#00c2ff] text-white flex items-center justify-center font-bold text-sm">
+                  {initiale}
+                </div>
+              )}
+              {/* Point vert */}
+              <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
+            </button>
+
+            {/* Menu déroulant du profil */}
+            {profileOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setProfileOpen(false)}
+                />
+
+                <div className="absolute right-0 top-14 z-50 bg-white rounded-2xl shadow-2xl border border-slate-200 w-72 overflow-hidden animate-[fadeIn_0.15s_ease]">
+                  {/* En-tête profil */}
+                  <div className="p-5 bg-gradient-to-br from-[#1e3c72] to-[#2a5298] text-white">
+                    <div className="flex items-center gap-3">
+                      {user?.avatar_url ? (
+                        <img
+                          src={user.avatar_url}
+                          alt={user.nom}
+                          className="w-14 h-14 rounded-full object-cover border-2 border-white/30"
+                        />
+                      ) : (
+                        <div className="w-14 h-14 rounded-full bg-white/20 backdrop-blur flex items-center justify-center font-bold text-xl">
+                          {initiale}
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <div className="font-bold truncate">
+                          {user?.nom || 'Utilisateur'}
+                        </div>
+                        <div className="text-xs text-white/70 truncate">
+                          {user?.email || 'email@alpha-tec.com'}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 mt-3">
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          roleConfig?.color || 'bg-white/20 text-white'
+                        }`}
+                      >
+                        {roleLabel.toUpperCase()}
+                      </span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-green-500/30 text-green-100">
+                        ● ACTIF
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Liens */}
+                  <div className="p-2">
+                    <Link
+                      href="/profil"
+                      onClick={() => setProfileOpen(false)}
+                      className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors"
+                    >
+                      <UserIcon className="w-4 h-4 text-[#2a5298]" />
+                      Mon profil
+                    </Link>
+
+                    <Link
+                      href="/profil"
+                      onClick={() => setProfileOpen(false)}
+                      className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-slate-700 hover:bg-slate-100 transition-colors"
+                    >
+                      <Settings className="w-4 h-4 text-purple-500" />
+                      Sécurité
+                    </Link>
+
+                    <div className="my-1 border-t border-slate-100" />
+
+                    <button
+                      onClick={handleLogout}
+                      className="w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+                    >
+                      <LogOut className="w-4 h-4" />
+                      Se déconnecter
+                    </button>
+                  </div>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </header>
 
-      {/* 🎯 PANNEAU NOTIFICATIONS */}
+      {/* 🔔 PANNEAU NOTIFICATIONS */}
       {notifOpen && (
         <>
-          {/* Overlay */}
           <div
             className="fixed inset-0 bg-black/40 backdrop-blur-sm z-50"
             onClick={() => setNotifOpen(false)}
           />
 
-          {/* Panneau */}
           <div className="fixed top-0 right-0 bottom-0 w-full sm:w-96 bg-white shadow-2xl z-[60] flex flex-col animate-[slideInRight_0.3s_ease]">
-            {/* Header du panneau */}
             <div className="flex items-center justify-between p-5 border-b border-slate-100 bg-gradient-to-r from-[#1e3c72] to-[#2a5298] text-white">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-white/20 backdrop-blur flex items-center justify-center">
@@ -248,7 +371,9 @@ export default function Header({ title, subtitle, user }: HeaderProps) {
                 <div>
                   <div className="font-bold text-base">Notifications</div>
                   <div className="text-xs text-white/70">
-                    {unreadCount > 0 ? `${unreadCount} non lue${unreadCount > 1 ? 's' : ''}` : 'Tout est lu'}
+                    {unreadCount > 0
+                      ? `${unreadCount} non lue${unreadCount > 1 ? 's' : ''}`
+                      : 'Tout est lu'}
                   </div>
                 </div>
               </div>
@@ -261,7 +386,6 @@ export default function Header({ title, subtitle, user }: HeaderProps) {
               </button>
             </div>
 
-            {/* Actions */}
             <div className="flex items-center justify-between px-5 py-3 border-b border-slate-100 bg-slate-50">
               <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 En temps réel
@@ -277,7 +401,6 @@ export default function Header({ title, subtitle, user }: HeaderProps) {
               )}
             </div>
 
-            {/* Liste */}
             <div className="flex-1 overflow-y-auto">
               {loading ? (
                 <div className="flex items-center justify-center py-20">
@@ -288,9 +411,11 @@ export default function Header({ title, subtitle, user }: HeaderProps) {
                   <div className="w-16 h-16 rounded-full bg-slate-100 flex items-center justify-center mb-4">
                     <Bell className="w-8 h-8 text-slate-300" />
                   </div>
-                  <div className="font-bold text-slate-700 mb-1">Aucune notification</div>
+                  <div className="font-bold text-slate-700 mb-1">
+                    Aucune notification
+                  </div>
                   <div className="text-xs text-slate-400">
-                    Vous êtes à jour ! Nous vous préviendrons en cas de nouveauté.
+                    Vous êtes à jour !
                   </div>
                 </div>
               ) : (
@@ -336,7 +461,6 @@ export default function Header({ title, subtitle, user }: HeaderProps) {
               )}
             </div>
 
-            {/* Footer */}
             {notifications.length > 0 && (
               <div className="p-4 border-t border-slate-100 bg-slate-50">
                 <button
@@ -352,11 +476,14 @@ export default function Header({ title, subtitle, user }: HeaderProps) {
         </>
       )}
 
-      {/* Animation du panneau */}
       <style jsx>{`
         @keyframes slideInRight {
           from { transform: translateX(100%); }
           to { transform: translateX(0); }
+        }
+        @keyframes fadeIn {
+          from { opacity: 0; }
+          to { opacity: 1; }
         }
       `}</style>
     </>
